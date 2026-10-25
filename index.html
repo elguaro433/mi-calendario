@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="theme-color" content="#5d4b80">
+<meta name="description" content="Cumpleaños y fechas importantes, con felicitación por WhatsApp. Todo se guarda solo en tu teléfono.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>Mi Calendario</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Estilo de la app (⚙️ Ajustes → Colores lo cambia): todo sale de estos 5 tonos.
+     --tint tiñe fondos y textos, --hdr1/--hdr2 la cabecera y --pink/--pink2 el acento (botones, hoy…) */
+  --tint: #7b5fae;
+  --hdr1: #5d4b80;
+  --hdr2: #7c67a3;
+  --pink: #f72585;
+  --pink2: #b5179e;
+
+  /* Tema claro pastel: sin blancos puros para no deslumbrar */
+  --bg: color-mix(in srgb, var(--tint) 15%, #fff);
+  --surface: color-mix(in srgb, var(--tint) 8%, #fff);
+  --card: color-mix(in srgb, var(--tint) 7%, #fff);
+  --card2: color-mix(in srgb, var(--tint) 15%, #fbfbfc);
+  --border: color-mix(in srgb, var(--hdr1) 14%, transparent);
+  --text: color-mix(in srgb, var(--hdr1) 35%, #16121f);
+  --muted: color-mix(in srgb, var(--tint) 35%, #666472);
+  --hint: color-mix(in srgb, var(--tint) 30%, #a19fa8);
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 6px 18px color-mix(in srgb, var(--hdr1) 8%, transparent);
+
+  --emerald: #00d68f;
+  --emerald-dim: rgba(0,214,143,.12);
+  --coral: #ff3d71;
+  --violet: #7b61ff;
+  --amber: #ffaa00;
+  --sky: #00b4d8;
+  --pink-dim: color-mix(in srgb, var(--pink) 10%, transparent);
+
+  --r: 16px;
+  --r-sm: 10px;
+}
+[data-theme="dark"] {
+  --bg: color-mix(in srgb, var(--tint) 14%, #232431);
+  --surface: color-mix(in srgb, var(--tint) 14%, #2f303f);
+  --card: color-mix(in srgb, var(--tint) 14%, #2f303f);
+  --card2: color-mix(in srgb, var(--tint) 16%, #3d3e50);
+  --border: rgba(255,255,255,.08);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --hint: #64748b;
+  --shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+[data-theme="dark"] .hdr { background: linear-gradient(135deg, color-mix(in srgb, var(--hdr1) 60%, #1b1b26) 0%, color-mix(in srgb, var(--hdr2) 60%, #1b1b26) 100%); }
+[data-theme="dark"] .hero { background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 22%, #15131f) 0%, color-mix(in srgb, var(--hdr1) 35%, #15131f) 100%); border-color: color-mix(in srgb, var(--pink) 30%, transparent); }
+[data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea { color-scheme: dark; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; font-size: 15px; line-height: 1.5;
+}
+button { font-family: inherit; -webkit-tap-highlight-color: transparent; }
+.cell, .ev-row, .mini-g span, .metric { -webkit-tap-highlight-color: transparent; }
+
+/* ── LAYOUT ── */
+.app { display: grid; grid-template-columns: 230px 1fr; grid-template-rows: 60px 1fr; min-height: 100vh; }
+.hdr {
+  grid-column: 1/-1;
+  background: linear-gradient(135deg, var(--hdr1) 0%, var(--hdr2) 100%);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+.hdr-logo { font-size: 16px; font-weight: 700; letter-spacing: -.3px; color: #fff; }
+.hdr-logo em { color: color-mix(in srgb, var(--pink) 22%, #fff); font-style: normal; }
+.hdr-actions { display: flex; align-items: center; gap: 8px; }
+.hdr-btn {
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.85); border-radius: 8px; padding: 6px 12px;
+  font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;
+}
+.hdr-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
+.sync-status { font-size: 12px; font-weight: 600; color: var(--sky); margin-right: 4px; }
+
+.side { background: var(--surface); border-right: 1px solid var(--border); padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-sm);
+  border: none; background: transparent; color: var(--muted); font-size: 13px; font-weight: 500;
+  cursor: pointer; text-align: left; width: 100%; transition: all .15s;
+}
+.nav-item:hover { background: var(--card2); color: var(--text); }
+.nav-item.active { background: linear-gradient(90deg, var(--pink-dim), transparent); color: var(--pink); border-left: 3px solid var(--pink); font-weight: 700; }
+.side-add { margin: 4px 0 14px; padding: 11px; border-radius: var(--r-sm); border: none; background: linear-gradient(135deg,var(--pink),var(--pink2)); color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 6px 16px color-mix(in srgb, var(--pink) 30%, transparent); }
+.side-sec { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+.side-lbl { font-size: 10px; color: var(--hint); text-transform: uppercase; letter-spacing: .6px; margin: 0 4px 8px; font-weight: 700; }
+.filt { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 12.5px; color: var(--text); user-select: none; }
+.filt:hover { background: var(--card2); }
+.filt input { accent-color: var(--pink); }
+.filt .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.filt.off { color: var(--hint); }
+
+.content { padding: 24px 28px 40px; overflow-y: auto; min-width: 0; }
+.page { display: none; }
+.page.active { display: block; }
+.page-title { font-size: 22px; font-weight: 800; letter-spacing: -.4px; margin-bottom: 4px; }
+.page-sub { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+
+/* ── HERO / RESUMEN ── */
+.hero { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.metric { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; position: relative; overflow: hidden; cursor: pointer; }
+.metric::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--c, var(--pink)); }
+.metric-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; font-weight: 700; }
+.metric-val { font-size: 17px; font-weight: 800; margin-top: 4px; line-height: 1.3; }
+.metric-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.avisos { background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 10%, transparent), color-mix(in srgb, var(--tint) 12%, transparent)); border: 1px solid color-mix(in srgb, var(--pink) 25%, transparent); border-radius: var(--r); padding: 12px 16px; margin-bottom: 18px; }
+.avisos-t { font-size: 12px; font-weight: 800; color: var(--pink); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.aviso { font-size: 13.5px; padding: 3px 0; cursor: pointer; }
+.aviso b { font-weight: 700; }
+
+/* ── MES ── */
+.cal-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.cal-title { font-size: 22px; font-weight: 800; letter-spacing: -.4px; text-transform: capitalize; min-width: 200px; }
+.nbtn { height: 36px; min-width: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-weight: 700; cursor: pointer; font-size: 14px; }
+@media (hover: hover) { .nbtn:hover { border-color: var(--pink); color: var(--pink); } }
+.cal { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.cal-head, .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); }
+.cal-head div { padding: 10px 8px; font-size: 11px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: .5px; text-align: center; border-bottom: 1px solid var(--border); }
+.cell { min-height: 112px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 6px; cursor: pointer; position: relative; transition: background .1s; min-width: 0; }
+.cell:nth-child(7n) { border-right: none; }
+@media (hover: hover) { .cell:hover { background: var(--card2); } }
+.cell.other { background: var(--bg); opacity: .55; }
+.cell.weekend .dnum { color: var(--muted); }
+.dnum { font-size: 13px; font-weight: 700; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin-bottom: 3px; }
+.cell.today .dnum { background: var(--pink); color: #fff; }
+.cell.holiday .dnum { color: var(--fest); }
+[data-theme="dark"] .cell.holiday .dnum { color: color-mix(in srgb, var(--fest) 50%, #fff); }
+.pill { display: block; font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 6px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: color-mix(in srgb, var(--c) 15%, transparent); color: var(--c); border-left: 3px solid var(--c); }
+.pill.fest { background: transparent; border-left-style: dotted; color: var(--muted); font-weight: 500; }
+.more { font-size: 10.5px; color: var(--muted); font-weight: 700; padding-left: 4px; }
+.dots { display: none; gap: 3px; flex-wrap: wrap; justify-content: center; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--c); display: block; }
+
+/* ── LISTAS ── */
+.sc { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 16px; }
+.sc-hdr { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.sc-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); }
+.ev-row { display: flex; align-items: center; gap: 12px; padding: 11px 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.ev-row:last-child { border-bottom: none; }
+@media (hover: hover) { .ev-row:hover { background: var(--card2); } }
+.date-badge { width: 46px; flex-shrink: 0; text-align: center; border-radius: 10px; padding: 4px 0; background: color-mix(in srgb, var(--c) 13%, transparent); color: var(--c); }
+.date-badge .d { font-size: 18px; font-weight: 800; line-height: 1.1; }
+.date-badge .m { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.ev-main { flex: 1; min-width: 0; }
+.ev-t { font-size: 14.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-s { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wa { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; border: none; background: #25d366; color: #fff; font-size: 16px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(37,211,102,.35); }
+.wa:active { transform: scale(.92); }
+.wa-ico { width: 60%; height: 60%; display: block; }
+.wa-btn .wa-ico { width: 20px; height: 20px; display: inline-block; vertical-align: -4px; margin-right: 6px; }
+.aviso .wa { width: 28px; height: 28px; font-size: 13px; margin-left: 6px; vertical-align: middle; }
+.btn.wa-btn { background: #25d366; color: #fff; border: none; }
+.when { font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: var(--card2); color: var(--muted); white-space: nowrap; }
+.when.hoy { background: var(--pink); color: #fff; }
+.when.pronto { background: rgba(255,170,0,.15); color: #d48c00; }
+.empty { padding: 28px 16px; text-align: center; color: var(--hint); font-size: 13.5px; }
+.empty button { margin-top: 10px; }
+
+/* ── AÑO ── */
+.year-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.mini { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 12px; }
+.mini-t { font-size: 13px; font-weight: 800; text-transform: capitalize; margin-bottom: 6px; cursor: pointer; }
+.mini-t:hover { color: var(--pink); }
+.mini-g { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.mini-g span { font-size: 10.5px; text-align: center; padding: 3px 0; border-radius: 6px; cursor: pointer; position: relative; }
+.mini-g span.h { color: var(--hint); font-weight: 700; font-size: 9px; cursor: default; }
+.mini-g span.ev { font-weight: 800; color: #fff; background: var(--c); border-radius: 8px; box-shadow: 0 1px 3px color-mix(in srgb, var(--c) 35%, transparent); }
+.mini-g span.fest { color: var(--fest); font-weight: 700; }
+.mini-g span.today { outline: 2px solid var(--pink); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 16px; font-size: 12px; color: var(--muted); }
+.legend span { display: flex; align-items: center; gap: 5px; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--c); display: block; }
+
+/* ── MODAL / HOJA ── */
+.ov { position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 300; display: none; align-items: center; justify-content: center; padding: 16px; }
+.ov.open { display: flex; }
+.sheet { background: var(--surface); border-radius: 20px; width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+.sheet-h { padding: 18px 20px 10px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--surface); z-index: 1; }
+.sheet-h h3 { font-size: 18px; font-weight: 800; }
+.x { width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--card2); color: var(--muted); font-size: 16px; cursor: pointer; }
+.sheet-b { padding: 4px 20px 20px; }
+.fld { margin-bottom: 12px; }
+.fld label { display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .4px; }
+.fld input, .fld select, .fld textarea { width: 100%; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--card2); color: var(--text); font-family: inherit; font-size: 15px; outline: none; min-width: 0; max-width: 100%; }
+.fld input[type=date], .fld input[type=time] { -webkit-appearance: none; appearance: none; min-height: 46px; }
+.fld input:focus, .fld select:focus, .fld textarea:focus { border-color: var(--pink); }
+.fld textarea { resize: vertical; min-height: 64px; }
+.row2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
+.tipos { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; }
+.tipo { border: 2px solid var(--border); background: var(--card2); border-radius: 12px; padding: 8px 2px; text-align: center; cursor: pointer; font-size: 10.5px; font-weight: 700; color: var(--muted); }
+.tipo .e { font-size: 20px; display: block; line-height: 1.3; }
+.tipo.sel { border-color: var(--c); color: var(--c); background: color-mix(in srgb, var(--c) 10%, transparent); }
+.chk { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
+.chk input { width: 18px; height: 18px; accent-color: var(--pink); }
+.btns { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.btn { flex: 1; padding: 12px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--card2); color: var(--text); font-weight: 700; font-size: 14px; cursor: pointer; }
+.btn.primary { background: linear-gradient(135deg,var(--pink),var(--pink2)); color: #fff; border: none; }
+.btn.danger { color: var(--coral); border-color: rgba(255,61,113,.4); background: transparent; flex: 0 0 auto; padding: 12px 16px; }
+.btn.small { flex: 0 0 auto; padding: 8px 14px; font-size: 13px; }
+.day-ev { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--card2); margin-bottom: 8px; cursor: pointer; border-left: 4px solid var(--c); }
+.day-ev .e { font-size: 22px; }
+.upd-banner { position: fixed; left: 50%; transform: translateX(-50%); bottom: 24px; z-index: 350; background: #1e293b; color: #fff; border-radius: 14px; padding: 10px 12px 10px 16px; display: flex; align-items: center; gap: 12px; font-size: 13.5px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.upd-banner[hidden] { display: none; }
+.upd-banner button { background: var(--pink); color: #fff; border: none; border-radius: 10px; padding: 8px 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+@media (max-width: 768px) { .upd-banner { bottom: calc(80px + env(safe-area-inset-bottom)); } }
+.gsteps { font-size: 13.5px; display: flex; flex-direction: column; gap: 6px; background: var(--card2); border-radius: 12px; padding: 12px 14px; }
+.hint { font-size: 12px; color: var(--hint); margin-top: -6px; margin-bottom: 12px; }
+
+.toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px); background: #1e293b; color: #fff; padding: 10px 18px; border-radius: 12px; font-size: 13.5px; font-weight: 600; opacity: 0; pointer-events: none; transition: all .2s; z-index: 400; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── RETOQUES: profundidad, animaciones y colores ── */
+.metric, .cal, .sc, .mini { box-shadow: var(--shadow); }
+.ov.open { animation: fundido .18s ease-out; }
+.ov.open .sheet { animation: subir .24s cubic-bezier(.2,.8,.3,1); }
+@keyframes fundido { from { opacity: 0; } }
+@keyframes subir { from { opacity: 0; transform: translateY(16px) scale(.98); } }
+.btn:active, .nbtn:active, .side-add:active, .fab:active { transform: scale(.97); }
+.ev-row:active, .cell:active { background: var(--card2); }
+.temas { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
+.tema { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px; border-radius: 12px; border: 2px solid transparent; background: var(--card2); cursor: pointer; font-size: 11px; font-weight: 700; color: var(--muted); }
+.tema.sel { border-color: var(--pink); color: var(--text); }
+.tema .bola { width: 34px; height: 34px; border-radius: 50%; box-shadow: inset 0 0 0 3px rgba(255,255,255,.35); }
+.tema input[type=color] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none; }
+.colores { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 6px; margin-bottom: 10px; }
+.color-fila { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 10px; background: var(--card2); font-size: 13px; font-weight: 600; cursor: pointer; min-width: 0; }
+.color-fila span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.color-fila input[type=color] { flex-shrink: 0; width: 28px; height: 28px; padding: 0; border: none; border-radius: 50%; background: none; cursor: pointer; }
+.color-fila input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
+.color-fila input[type=color]::-webkit-color-swatch { border: 2px solid rgba(255,255,255,.6); border-radius: 50%; }
+.color-fila input[type=color]::-moz-color-swatch { border: 2px solid rgba(255,255,255,.6); border-radius: 50%; }
+.confeti { position: fixed; top: -12px; width: 8px; height: 12px; border-radius: 2px; z-index: 500; pointer-events: none; animation: caer linear forwards; }
+@keyframes caer { to { transform: translate(var(--dx), 105vh) rotate(var(--giro)); opacity: .9; } }
+@media (prefers-reduced-motion: reduce) { .ov.open, .ov.open .sheet { animation: none; } .confeti { display: none; } }
+
+/* Dentro de .fld las etiquetas son títulos en mayúsculas; las casillas y colores no */
+.fld .chk, .fld .color-fila, .fld .tema { text-transform: none; letter-spacing: 0; margin-bottom: 0; font-size: 13.5px; color: var(--text); display: flex; }
+.fld .chk { margin-bottom: 10px; font-weight: 600; }
+.fld .tema { font-size: 11px; color: var(--muted); }
+.fld .tema.sel { color: var(--text); }
+
+.tabbar, .fab, .hdr-more { display: none; }
+/* ── Lavado de cara v1.27 ── */
+.ico { width: 1.15em; height: 1.15em; vertical-align: -0.2em; flex-shrink: 0; }
+.hdr-logo { display: flex; align-items: center; gap: 7px; }
+.hdr-logo .ico { color: color-mix(in srgb, var(--pink) 25%, #fff); }
+.sync-status[hidden] { display: none !important; }
+.ev-t { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3; }
+.ev-s { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-top: 2px; }
+.ev-s .when { display: inline-block; font-size: 11px; padding: 1px 8px; margin-right: 6px; vertical-align: 1px; }
+.wa.discreto { width: 30px; height: 30px; background: transparent; color: #25d366; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, #25d366 55%, transparent); }
+.franja { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px; margin-bottom: 14px; font-size: 13.5px; color: var(--muted); box-shadow: var(--shadow); }
+.franja span { cursor: pointer; }
+.franja b { color: var(--text); }
+.franja-prox { color: var(--text); }
+.hero { display: block !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+.cell.esc { background: color-mix(in srgb, var(--esc) 12%, transparent); }
+.cell.today.esc { background: color-mix(in srgb, var(--esc) 12%, transparent); }
+.dots { align-items: center; }
+.dots b { font-size: 11px; line-height: 1; font-weight: 400; }
+.dots small { font-size: 9px; font-weight: 800; color: var(--muted); }
+[data-theme="dark"] .date-badge { color: color-mix(in srgb, var(--c) 55%, #fff); background: color-mix(in srgb, var(--c) 22%, transparent); }
+[data-theme="dark"] .cell.holiday .dnum { color: color-mix(in srgb, var(--fest) 35%, #fff); }
+.footer { padding-bottom: 24px; }
+.hint a { color: var(--pink); font-weight: 700; }
+.aj-quien { background: var(--card2); border-radius: 12px; padding: 10px 14px; font-size: 13.5px; line-height: 1.5; margin-bottom: 14px; color: var(--muted); }
+.aj-quien b { color: var(--text); }
+.seg { display: flex; gap: 4px; background: var(--card2); border-radius: 12px; padding: 4px; }
+.seg button { flex: 1; border: none; background: transparent; padding: 9px 4px; border-radius: 9px; font-family: inherit; font-weight: 700; font-size: 13.5px; color: var(--muted); cursor: pointer; }
+.seg button.sel { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.aj-det { margin-bottom: 14px; }
+.aj-det summary { cursor: pointer; list-style: none; font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; padding: 10px 14px; background: var(--card2); border-radius: 12px; display: flex; justify-content: space-between; }
+.aj-det summary::-webkit-details-marker { display: none; }
+.aj-det summary::after { content: '›'; font-size: 16px; line-height: 1; transition: transform .2s; }
+.aj-det[open] summary::after { transform: rotate(90deg); }
+.aj-det[open] summary { margin-bottom: 10px; }
+.btn.aj-ancho { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.hdr-more .ico { width: 22px; height: 22px; }
+.footer { text-align: center; padding: 30px 20px 10px; color: var(--hint); font-size: 11px; border-top: 1px solid var(--border); margin-top: 30px; }
+
+/* ── MÓVIL ── */
+@media (max-width: 1100px) { .year-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px) {
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .side { display: none; }
+  .hdr { padding: calc(6px + env(safe-area-inset-top)) 16px 6px; min-height: 52px; }
+  .hdr-logo { font-size: 15px; }
+  .hdr-btn { display: none; }
+  .hdr-more { display: flex; font-size: 18px; padding: 4px 10px; }
+  .sync-status { font-size: 0; width: 9px; height: 9px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
+  .content { padding: 14px 16px 96px; }
+  /* Resumen en una fila que se desliza, para que el calendario quede a la vista */
+  .hero { display: flex; overflow-x: auto; gap: 8px; margin: 0 -16px 14px; padding: 0 16px 4px; scroll-padding: 0 16px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .hero::-webkit-scrollbar { display: none; }
+  .metric { flex: 0 0 78%; padding: 12px 14px; scroll-snap-align: start; }
+  .metric-val { font-size: 15px; }
+  .avisos { padding: 10px 14px; margin-bottom: 12px; }
+  .fld input, .fld select, .fld textarea { font-size: 16px; }   /* evita el zoom automático del iPhone */
+  .cal-nav { margin-bottom: 10px; }
+  .nbtn { height: 40px; min-width: 40px; }
+  .cal-title { font-size: 18px; min-width: 0; flex: 1; }
+  .cell { min-height: 54px; padding: 5px 2px; }
+  .dots i { width: 7px; height: 7px; }
+  .dnum { margin: 0 auto 3px; font-size: 12.5px; }
+  .pill, .more { display: none; }
+  .dots { display: flex; }
+  .cal-head div { padding: 8px 0; font-size: 10px; }
+  .year-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mini { padding: 10px 8px; }
+  .mini-g span { font-size: 10px; padding: 2px 0; }
+  .ov { align-items: flex-end; padding: 0; }
+  .sheet { border-radius: 20px 20px 0 0; max-height: 94vh; padding-bottom: env(safe-area-inset-bottom); }
+  .tabbar {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 200;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 16px rgba(0,0,0,.08);
+  }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; background: transparent; border: none; color: var(--muted); font-size: 11px; font-weight: 600; padding: 4px 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .tab-ico { font-size: 22px; }
+  .tab-ico { font-size: 22px; line-height: 1; display: flex; }
+  .tab-item.active { color: var(--pink); }
+  .tab-item.active .tab-ico { color: var(--pink); }
+  .fab {
+    display: flex; position: fixed; right: 18px; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 210;
+    width: 56px; height: 56px; border-radius: 50%; border: none;
+    background: linear-gradient(135deg,var(--pink),var(--pink2)); color: #fff; font-size: 30px; font-weight: 700;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--pink) 40%, transparent); cursor: pointer; align-items: center; justify-content: center;
+  }
+  .toast { bottom: calc(90px + env(safe-area-inset-bottom)); }
+  .tipo { font-size: 9.5px; }
+}
+/* ── Versión pública ── */
+.hdr-logo em { font-style: normal; }
+.tel-opc { display: flex; flex-direction: column; gap: 8px; }
+.tel-opc button { text-align: left; }
+.bienv-logo { width: 72px; height: 72px; border-radius: 18px; display: block; margin: 4px auto 10px; box-shadow: var(--shadow); }
+.bienv-txt { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+.footer a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hdr">
+    <div class="hdr-logo"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8.5" cy="14.5" r="1.2" fill="currentColor"/><circle cx="12" cy="14.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="14.5" r="1.2" fill="currentColor"/></svg> <span data-i18n="app">Mi Calendario</span></div>
+    <div class="hdr-actions">
+      <button class="hdr-btn" onclick="openAjustes()"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg> <span data-i18n="ajustes">Ajustes</span></button>
+      <button class="hdr-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
+      <button class="hdr-btn hdr-more" onclick="openAjustes()" data-i18n-aria="ajustes" aria-label="Ajustes"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
+    </div>
+  </header>
+
+  <nav class="side">
+    <button class="side-add" onclick="openForm()" data-i18n="nuevo">＋ Nuevo evento</button>
+    <button class="nav-item active" data-page="mes" onclick="go('mes')"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8.5" cy="14.5" r="1.2" fill="currentColor"/><circle cx="12" cy="14.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="14.5" r="1.2" fill="currentColor"/></svg> <span data-i18n="mes">Mes</span></button>
+    <button class="nav-item" data-page="proximos" onclick="go('proximos')"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> <span data-i18n="proximos">Próximos</span></button>
+    <button class="nav-item" data-page="cumples" onclick="go('cumples')"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20.5h16M5 20.5v-6.5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M5 16c1.2 1 2.3 1 3.5 0s2.3-1 3.5 0 2.3 1 3.5 0 2.3-1 3.5 0M9 12V9.5M15 12V9.5M12 12V8.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 4.2c.9.9.9 2 0 2.6-.9-.6-.9-1.7 0-2.6z" fill="currentColor"/></svg> <span data-i18n="cumples">Cumpleaños</span></button>
+  </nav>
+
+  <main class="content">
+    <!-- MES -->
+    <section class="page active" id="page-mes">
+      <div id="avisos"></div>
+      <div class="hero" id="hero"></div>
+      <div class="cal-nav">
+        <button class="nbtn" onclick="moveMonth(-1)">‹</button>
+        <div class="cal-title" id="cal-title"></div>
+        <button class="nbtn" onclick="moveMonth(1)">›</button>
+        <button class="nbtn" onclick="goToday()" data-i18n="hoy">Hoy</button>
+      </div>
+      <div class="cal">
+        <div class="cal-head" id="cal-head"></div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <div class="sc" style="margin-top:16px">
+        <div class="sc-hdr"><div class="sc-title" id="mes-list-title"></div></div>
+        <div id="mes-list"></div>
+      </div>
+    </section>
+
+    <!-- PRÓXIMOS -->
+    <section class="page" id="page-proximos">
+      <div class="page-title" data-i18n="proxTitulo">Próximos eventos</div>
+      <div class="page-sub" data-i18n="proxSub">Todo lo que viene en los próximos 12 meses.</div>
+      <div id="prox-list"></div>
+    </section>
+
+    <!-- CUMPLEAÑOS -->
+    <section class="page" id="page-cumples">
+      <div class="page-title" data-i18n="cumTitulo">Cumpleaños y aniversarios</div>
+      <div class="page-sub" data-i18n="cumSub">Ordenados por el que llega antes.</div>
+      <div id="cumple-list"></div>
+    </section>
+
+    <div class="footer">
+      <div style="font-weight:600;margin-bottom:2px;" data-i18n="app">Mi Calendario</div>
+      <div data-i18n="firma">Creada por Emmanuel Díaz</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.6;"><span id="app-version"></span> — <a href="privacidad.html" data-i18n="privacidad">Privacidad</a></div>
+    </div>
+  </main>
+</div>
+
+<nav class="tabbar">
+  <button class="tab-item active" data-page="mes" onclick="go('mes')"><span class="tab-ico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8.5" cy="14.5" r="1.2" fill="currentColor"/><circle cx="12" cy="14.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="14.5" r="1.2" fill="currentColor"/></svg></span><span data-i18n="mes">Mes</span></button>
+  <button class="tab-item" data-page="proximos" onclick="go('proximos')"><span class="tab-ico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span data-i18n="proximos">Próximos</span></button>
+  <button class="tab-item" data-page="cumples" onclick="go('cumples')"><span class="tab-ico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20.5h16M5 20.5v-6.5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M5 16c1.2 1 2.3 1 3.5 0s2.3-1 3.5 0 2.3 1 3.5 0 2.3-1 3.5 0M9 12V9.5M15 12V9.5M12 12V8.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 4.2c.9.9.9 2 0 2.6-.9-.6-.9-1.7 0-2.6z" fill="currentColor"/></svg></span><span data-i18n="cumplesCorto">Cumples</span></button>
+</nav>
+<button class="fab" onclick="openForm()" data-i18n-aria="nuevoEv" aria-label="Nuevo evento">＋</button>
+
+<!-- FORMULARIO -->
+<div class="ov" id="ov-form" onclick="if(event.target===this)closeOv('ov-form')">
+  <div class="sheet">
+    <div class="sheet-h"><h3 id="form-title"></h3><button class="x" onclick="closeOv('ov-form')">✕</button></div>
+    <div class="sheet-b">
+      <div class="fld"><label data-i18n="tipo">Tipo</label><div class="tipos" id="f-tipos"></div></div>
+      <div class="fld"><label id="f-titulo-lbl"></label><input id="f-titulo" type="text" autocomplete="off"></div>
+      <div class="row2">
+        <div class="fld"><label data-i18n="fecha">Fecha</label><input id="f-fecha" type="date"></div>
+        <div class="fld"><label data-i18n="hora">Hora (opcional)</label><input id="f-hora" type="time"></div>
+      </div>
+      <label class="chk" id="f-anio-wrap"><input type="checkbox" id="f-anio"> <span id="f-anio-txt"></span></label>
+      <div class="row2">
+        <div class="fld"><label data-i18n="repite">Se repite</label>
+          <select id="f-repite">
+            <option value="no" data-i18n="rNo"></option>
+            <option value="anual" data-i18n="rAnual"></option>
+            <option value="mensual" data-i18n="rMensual"></option>
+            <option value="semanal" data-i18n="rSemanal"></option>
+          </select>
+        </div>
+        <div class="fld"><label data-i18n="avisar">Avisarme</label>
+          <select id="f-aviso">
+            <option value="0" data-i18n="a0"></option>
+            <option value="1" data-i18n="a1"></option>
+            <option value="3" data-i18n="a3"></option>
+            <option value="7" data-i18n="a7"></option>
+            <option value="14" data-i18n="a14"></option>
+            <option value="30" data-i18n="a30"></option>
+          </select>
+        </div>
+      </div>
+      <p class="hint" data-i18n="avisoHint"></p>
+      <div class="fld"><label data-i18n="persona"></label><input id="f-persona" type="text" list="personas" data-i18n-ph="personaPh" autocomplete="off"><datalist id="personas"></datalist></div>
+      <div class="fld" id="f-tel-wrap"><label data-i18n="wa"></label><div style="display:flex;gap:8px"><input id="f-tel" type="tel" inputmode="tel" autocomplete="off" oninput="pintarTel()" style="flex:1;min-width:0"><button type="button" class="btn" id="f-tel-btn" onclick="traerTel()" style="flex:none" data-i18n="contactos"></button></div><p class="hint" id="f-tel-hint" style="margin:6px 0 0"></p></div>
+      <div class="fld" id="f-msg-wrap"><label data-i18n="msg"></label><textarea id="f-msg" rows="4" data-i18n-ph="msgPh"></textarea>
+        <p class="hint" style="margin:6px 0 0"><span data-i18n-html="msgHint"></span> <a href="#" onclick="event.preventDefault();partirDelAutomatico()" data-i18n="partir"></a></p></div>
+      <div class="fld"><label data-i18n="notas"></label><textarea id="f-notas" data-i18n-ph="notasPh"></textarea></div>
+      <div class="btns">
+        <button class="btn wa-btn" id="f-wa" onclick="felicitar(editId)" style="flex-basis:100%"><span id="f-wa-ico"></span><span data-i18n="felicitarWA"></span></button>
+        <button class="btn danger" id="f-del" onclick="delEvent()">🗑️</button>
+        <button class="btn" onclick="closeOv('ov-form')" data-i18n="cancelar"></button>
+        <button class="btn primary" onclick="saveEvent()" data-i18n="guardar"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ELEGIR NÚMERO (contacto con varios teléfonos) -->
+<div class="ov" id="ov-tel" onclick="if(event.target===this)closeOv('ov-tel')">
+  <div class="sheet">
+    <div class="sheet-h"><h3 data-i18n="elegirNum"></h3><button class="x" onclick="closeOv('ov-tel')">✕</button></div>
+    <div class="sheet-b"><div class="tel-opc" id="tel-opc"></div></div>
+  </div>
+</div>
+
+<!-- DÍA -->
+<div class="ov" id="ov-day" onclick="if(event.target===this)closeOv('ov-day')">
+  <div class="sheet">
+    <div class="sheet-h"><h3 id="day-title"></h3><button class="x" onclick="closeOv('ov-day')">✕</button></div>
+    <div class="sheet-b"><div id="day-list"></div>
+      <div class="btns"><button class="btn primary" id="day-add"></button></div>
+    </div>
+  </div>
+</div>
+
+<!-- BIENVENIDA (primera vez: idioma y país) -->
+<div class="ov" id="ov-bienv">
+  <div class="sheet">
+    <div class="sheet-b" style="padding-top:20px">
+      <img class="bienv-logo" src="icon-192.png" alt="">
+      <h3 style="text-align:center;font-size:20px;font-weight:800;margin-bottom:6px" data-i18n="bienvTitulo"></h3>
+      <p class="bienv-txt" data-i18n="bienvTexto"></p>
+      <div class="fld"><label data-i18n="idioma"></label>
+        <select id="b-idioma" class="sel-idioma" onchange="setIdioma(this.value, true)"></select></div>
+      <div class="fld"><label data-i18n="pais"></label><select id="b-pais"></select>
+        <p class="hint" style="margin:6px 0 0" data-i18n="paisHint"></p></div>
+      <div class="btns"><button class="btn primary" onclick="terminarBienvenida()" data-i18n="empezar"></button></div>
+    </div>
+  </div>
+</div>
+
+<!-- AJUSTES -->
+<div class="ov" id="ov-aj" onclick="if(event.target===this)closeOv('ov-aj')">
+  <div class="sheet">
+    <div class="sheet-h"><h3 data-i18n="ajustes"></h3><button class="x" onclick="closeOv('ov-aj')">✕</button></div>
+    <div class="sheet-b">
+      <div class="aj-quien" id="aj-quien"></div>
+      <div class="row2">
+        <div class="fld"><label data-i18n="idioma"></label>
+          <select id="aj-idioma" class="sel-idioma" onchange="setIdioma(this.value)"></select></div>
+        <div class="fld"><label data-i18n="pais"></label><select id="aj-pais" onchange="setPais(this.value)"></select></div>
+      </div>
+      <p class="hint" data-i18n="paisHint"></p>
+      <div class="fld"><label data-i18n="apariencia"></label>
+        <div class="seg" id="seg-tema">
+          <button type="button" data-t="light" onclick="setApariencia('light')" data-i18n="claro"></button>
+          <button type="button" data-t="dark" onclick="setApariencia('dark')" data-i18n="oscuro"></button>
+          <button type="button" data-t="auto" onclick="setApariencia('auto')" data-i18n="auto"></button>
+        </div>
+      </div>
+      <div class="fld"><label data-i18n="estilo"></label><div class="temas" id="temas"></div></div>
+      <div class="fld"><label data-i18n="mostrar"></label><div id="filtros"></div></div>
+      <details class="aj-det">
+        <summary data-i18n="coloresTipo"></summary>
+        <div class="colores" id="colores"></div>
+        <button class="btn small" onclick="resetColores()" data-i18n="reset"></button>
+        <p class="hint" style="margin:8px 0 0" data-i18n="coloresHint"></p>
+      </details>
+      <div class="fld"><label data-i18n="copias"></label>
+        <p class="hint" style="margin:0 0 8px" data-i18n="copiasHint"></p>
+        <div class="btns" style="margin-top:0">
+          <button class="btn" onclick="exportJSON()" data-i18n="guardarCopia"></button>
+          <button class="btn" onclick="document.getElementById('imp-file').click()" data-i18n="recuperar"></button>
+        </div>
+        <input type="file" id="imp-file" accept=".json,application/json" hidden onchange="importJSON(this)">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="upd-banner" id="upd-banner" hidden><span data-i18n="nuevaVer"></span><button onclick="location.reload()" data-i18n="actualizar"></button></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="comun.js?v=1.0"></script>
+<script>
+// Mi Calendario — versión pública (Google Play). Sale de la app de la familia (Familia\Calendario)
+// sin datos personales: todo se guarda solo en este teléfono (localStorage) y se puede guardar una copia.
+const APP_VERSION = '1.0';
+const TIPOS = CalComun.TIPOS;
+let FEST_COLOR = '#9b2226';
+const COL_BASE = { ...Object.fromEntries(Object.entries(TIPOS).map(([k, t]) => [k, t.color])), festivo: FEST_COLOR, estaciones: CalComun.EST_COLOR };
+
+// ══ ESTADO ══
+const LS_KEY = 'micalendario_data';
+// localStorage puede no estar disponible (incógnito, etc.): nunca romper la app por eso
+const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
+let EVENTS = [];
+let CFG = { idioma: '', pais: '', ocultos: [], tema: 'lavanda', propio: '', colores: {} };
+try {
+  const s = JSON.parse(store.get(LS_KEY));
+  if (s) { EVENTS = s.events || []; CFG = Object.assign(CFG, s.cfg || {}); }
+} catch (e) {}
+function persist() { store.set(LS_KEY, JSON.stringify({ events: EVENTS, cfg: CFG })); }
+
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+let viewY = TODAY.getFullYear(), viewM = TODAY.getMonth();
+let page = 'mes';
+let editId = null, selTipo = 'cumple';
+
+// ══ IDIOMA ══ es, en, pt, fr, ca, it, de (lista en comun.js). Sin elegir: el del teléfono si está, si no inglés.
+// Para añadir uno: su tabla aquí, su línea en IDIOMAS y MENSAJES, y sus textos en comun.js. Lo que falte sale en inglés.
+const T = {
+  es: {
+    app: 'Mi Calendario', nuevo: '＋ Nuevo evento', mes: 'Mes', proximos: 'Próximos', cumples: 'Cumpleaños', cumplesCorto: 'Cumples',
+    ajustes: 'Ajustes', hoy: 'Hoy', proxTitulo: 'Próximos eventos', proxSub: 'Todo lo que viene en los próximos 12 meses.',
+    cumTitulo: 'Cumpleaños y aniversarios', cumSub: 'Ordenados por el que llega antes.', firma: 'Creada por Emmanuel Díaz', privacidad: 'Privacidad',
+    nuevoEv: 'Nuevo evento', editarEv: 'Editar evento', tipo: 'Tipo', titulo: 'Título', quienCumple: '¿Quién cumple años?',
+    fecha: 'Fecha', hora: 'Hora (opcional)',
+    anioCumple: 'Sé el año de nacimiento (para mostrar la edad que cumple)', anioRecuerdo: 'Sé el año (para contar los años que han pasado)', anioOtro: 'Sé el año en que empezó (para contar los años)',
+    repite: 'Se repite', rNo: 'No, una sola vez', rAnual: 'Cada año', rMensual: 'Cada mes', rSemanal: 'Cada semana',
+    avisar: 'Avisarme', a0: 'El mismo día', a1: '1 día antes', a3: '3 días antes', a7: '1 semana antes', a14: '2 semanas antes', a30: '1 mes antes',
+    avisoHint: 'El aviso sale arriba, en «No te olvides», cuando abres la app.',
+    persona: '¿De quién? / Grupo (opcional)', personaPh: 'Ej: Familia, Trabajo, Amigos…',
+    wa: 'WhatsApp (opcional)', contactos: '👤 Contactos', telPh: 'Ej: +34 612 345 678',
+    telHint0: 'Con su número, el botón verde abre su chat directamente.', telOk: '✓ Se abrirá el chat de +{0}', telMal: 'Revisa el número: ponlo con el prefijo del país, por ejemplo +{0}.',
+    msg: 'Mensaje para felicitar (opcional)', msgPh: 'Vacío = se envía el mensaje automático',
+    msgHint: 'Escribe tu propio mensaje. <b>{nombre}</b> y <b>{edad}</b> se cambian solos.', partir: 'Partir del automático',
+    notas: 'Notas (opcional)', notasPh: 'Ideas de regalo, lugar, qué llevar…', felicitarWA: 'Felicitar por WhatsApp', cancelar: 'Cancelar', guardar: 'Guardar',
+    anadirDia: '＋ Añadir en este día', nadaDia: 'Nada apuntado este día.',
+    escribeTitulo: 'Escribe un título', eligeFecha: 'Elige una fecha', actualizado: 'Evento actualizado ✓', guardado: 'Evento guardado ✓',
+    borrar: '¿Borrar «{0}»?', borrado: 'Evento borrado', noTel: 'No se pudo traer el número: escríbelo a mano', sinTel: 'Ese contacto no tiene teléfono',
+    elegirNum: '¿Cuál es su WhatsApp?',
+    idioma: 'Idioma', pais: 'País', paisHint: 'Para los festivos, el Día de la Madre y el prefijo de los teléfonos.', otroPais: 'Otro país',
+    apariencia: 'Apariencia', claro: '☀️ Claro', oscuro: '🌙 Oscuro', auto: 'Automático', estilo: '🎨 Estilo de la app',
+    mostrar: 'Qué mostrar en el calendario', capaFest: '🔴 Días festivos', capaCeleb: '🎉 Celebraciones (Día de la Madre…)', capaEst: '🌗 Estaciones y cambio de hora',
+    sinFest: 'Para tu país aún no hay festivos.',
+    coloresTipo: 'Colores de cada tipo de evento', reset: '↺ Volver a los colores originales', coloresHint: 'Los colores se guardan en este teléfono.', coloresOrig: 'Colores originales',
+    colCeleb: '🎉 Celebraciones', colFest: '🔴 Festivos', colEst: '🌗 Estaciones',
+    copias: 'Copia de seguridad', copiasHint: 'Tus fechas se guardan solo en este teléfono. Guarda una copia de vez en cuando (por ejemplo en Google Drive) por si cambias de móvil.',
+    guardarCopia: '💾 Guardar copia', recuperar: '📂 Recuperar copia', reemplazar: 'Esto cambiará los {0} eventos actuales por los {1} de la copia. ¿Continuar?',
+    restaurada: 'Copia recuperada ✓', copiaMala: 'Ese archivo no es una copia válida', resumen: '<b>{0}</b> fechas · <b>{1}</b> cumpleaños · <b>{2}</b> con WhatsApp',
+    bienvTitulo: '¡Hola! 👋', bienvTexto: 'Apunta los cumpleaños y las fechas importantes, y felicita por WhatsApp con un toque. Todo se guarda solo en tu teléfono.', empezar: 'Empezar',
+    noTeOlvides: '🔔 No te olvides', hoyNada: 'Hoy, {0}: nada especial', proximo: 'Próximo:', enMes: 'En {0}', mesVacio: 'No hay nada apuntado en {0}.',
+    anadirEv: '＋ Añadir evento', vacioTodo: 'Todavía no has añadido eventos.<br>Empieza por los cumpleaños 🎂', vacioCum: 'Aún no hay cumpleaños.', anadirCum: '＋ Añadir cumpleaños',
+    cumpleN: ' (cumple {0})', festivo: 'Día festivo', celebracion: 'Celebración', masN: '+{0} más',
+    hoyX: '¡Hoy!', manana: 'Mañana', haceD: 'Hace {0} d', enD: 'En {0} días', enM: 'En {0} meses',
+    cumpleA: 'Cumple {0}', cumpliria: 'Cumpliría {0}', partida: '{0} de su partida', juntos: '{0} juntos', seCumplen: 'Se cumplen {0}', anio: 'año', anios: 'años',
+    nuevaVer: 'Hay una versión nueva', actualizar: 'Actualizar', tuColor: 'Tu color', nombreEj: 'Nombre',
+    hdrTitulos: { cumple: 'Ej: Ana', aniversario: 'Ej: Aniversario de boda', celebracion: 'Ej: Comunión de Pablo', familiar: 'Ej: Comida en casa de los abuelos', recordatorio: 'Ej: Renovar el pasaporte', salud: 'Ej: Dentista', escuela: 'Ej: Reunión de padres', recuerdo: 'Ej: Abuela Carmen', otro: 'Ej: …' },
+  },
+  en: {
+    app: 'My Calendar', nuevo: '＋ New event', mes: 'Month', proximos: 'Upcoming', cumples: 'Birthdays', cumplesCorto: 'Birthdays',
+    ajustes: 'Settings', hoy: 'Today', proxTitulo: 'Upcoming events', proxSub: 'Everything coming up in the next 12 months.',
+    cumTitulo: 'Birthdays and anniversaries', cumSub: 'Soonest first.', firma: 'Created by Emmanuel Díaz', privacidad: 'Privacy',
+    nuevoEv: 'New event', editarEv: 'Edit event', tipo: 'Type', titulo: 'Title', quienCumple: 'Whose birthday is it?',
+    fecha: 'Date', hora: 'Time (optional)',
+    anioCumple: 'I know the year of birth (to show their age)', anioRecuerdo: 'I know the year (to count the years since)', anioOtro: 'I know the year it started (to count the years)',
+    repite: 'Repeats', rNo: 'No, just once', rAnual: 'Every year', rMensual: 'Every month', rSemanal: 'Every week',
+    avisar: 'Remind me', a0: 'On the day', a1: '1 day before', a3: '3 days before', a7: '1 week before', a14: '2 weeks before', a30: '1 month before',
+    avisoHint: 'The reminder shows at the top, under “Don’t forget”, when you open the app.',
+    persona: 'Whose? / Group (optional)', personaPh: 'E.g. Family, Work, Friends…',
+    wa: 'WhatsApp (optional)', contactos: '👤 Contacts', telPh: 'E.g. +1 555 123 4567',
+    telHint0: 'With their number, the green button opens their chat directly.', telOk: '✓ It will open the chat with +{0}', telMal: 'Check the number: include the country code, e.g. +{0}.',
+    msg: 'Birthday message (optional)', msgPh: 'Empty = the automatic message is sent',
+    msgHint: 'Write your own message. <b>{name}</b> and <b>{age}</b> are filled in for you.', partir: 'Start from the automatic one',
+    notas: 'Notes (optional)', notasPh: 'Gift ideas, place, what to bring…', felicitarWA: 'Send wishes on WhatsApp', cancelar: 'Cancel', guardar: 'Save',
+    anadirDia: '＋ Add on this day', nadaDia: 'Nothing on this day.',
+    escribeTitulo: 'Write a title', eligeFecha: 'Pick a date', actualizado: 'Event updated ✓', guardado: 'Event saved ✓',
+    borrar: 'Delete “{0}”?', borrado: 'Event deleted', noTel: 'Could not get the number: type it in', sinTel: 'That contact has no phone number',
+    elegirNum: 'Which one is their WhatsApp?',
+    idioma: 'Language', pais: 'Country', paisHint: 'For public holidays, Mother’s Day and phone country codes.', otroPais: 'Other country',
+    apariencia: 'Appearance', claro: '☀️ Light', oscuro: '🌙 Dark', auto: 'Automatic', estilo: '🎨 App style',
+    mostrar: 'What to show on the calendar', capaFest: '🔴 Public holidays', capaCeleb: '🎉 Celebrations (Mother’s Day…)', capaEst: '🌗 Seasons and clock changes',
+    sinFest: 'No public holidays for your country yet.',
+    coloresTipo: 'Colour of each event type', reset: '↺ Back to the original colours', coloresHint: 'Colours are saved on this phone.', coloresOrig: 'Original colours',
+    colCeleb: '🎉 Celebrations', colFest: '🔴 Holidays', colEst: '🌗 Seasons',
+    copias: 'Backup', copiasHint: 'Your dates are saved only on this phone. Save a backup now and then (for example to Google Drive) in case you change phones.',
+    guardarCopia: '💾 Save backup', recuperar: '📂 Restore backup', reemplazar: 'This will replace your {0} events with the {1} in the backup. Continue?',
+    restaurada: 'Backup restored ✓', copiaMala: 'That file is not a valid backup', resumen: '<b>{0}</b> dates · <b>{1}</b> birthdays · <b>{2}</b> with WhatsApp',
+    bienvTitulo: 'Hi! 👋', bienvTexto: 'Keep birthdays and important dates, and send wishes on WhatsApp with one tap. Everything stays on your phone.', empezar: 'Start',
+    noTeOlvides: '🔔 Don’t forget', hoyNada: 'Today, {0}: nothing special', proximo: 'Next:', enMes: 'In {0}', mesVacio: 'Nothing planned in {0}.',
+    anadirEv: '＋ Add event', vacioTodo: 'You haven’t added any events yet.<br>Start with birthdays 🎂', vacioCum: 'No birthdays yet.', anadirCum: '＋ Add birthday',
+    cumpleN: ' (turns {0})', festivo: 'Public holiday', celebracion: 'Celebration', masN: '+{0} more',
+    hoyX: 'Today!', manana: 'Tomorrow', haceD: '{0} d ago', enD: 'In {0} days', enM: 'In {0} months',
+    cumpleA: 'Turns {0}', cumpliria: 'Would turn {0}', partida: '{0} since they passed', juntos: '{0} together', seCumplen: '{0}', anio: 'year', anios: 'years',
+    nuevaVer: 'A new version is available', actualizar: 'Update', tuColor: 'Your colour', nombreEj: 'Name',
+    hdrTitulos: { cumple: 'E.g. Anna', aniversario: 'E.g. Wedding anniversary', celebracion: 'E.g. Paul’s graduation', familiar: 'E.g. Lunch at grandma’s', recordatorio: 'E.g. Renew passport', salud: 'E.g. Dentist', escuela: 'E.g. Parents’ meeting', recuerdo: 'E.g. Grandma Mary', otro: 'E.g. …' },
+  },
+  pt: {
+    app: 'Meu Calendário', nuevo: '＋ Novo evento', mes: 'Mês', proximos: 'Próximos', cumples: 'Aniversários', cumplesCorto: 'Aniversários',
+    ajustes: 'Configurações', hoy: 'Hoje', proxTitulo: 'Próximos eventos', proxSub: 'Tudo o que vem nos próximos 12 meses.',
+    cumTitulo: 'Aniversários e bodas', cumSub: 'Primeiro os mais próximos.', firma: 'Criado por Emmanuel Díaz', privacidad: 'Privacidade',
+    nuevoEv: 'Novo evento', editarEv: 'Editar evento', tipo: 'Tipo', titulo: 'Título', quienCumple: 'Quem faz aniversário?',
+    fecha: 'Data', hora: 'Hora (opcional)',
+    anioCumple: 'Sei o ano de nascimento (para mostrar a idade)', anioRecuerdo: 'Sei o ano (para contar os anos que passaram)', anioOtro: 'Sei o ano em que começou (para contar os anos)',
+    repite: 'Repete', rNo: 'Não, só uma vez', rAnual: 'Todo ano', rMensual: 'Todo mês', rSemanal: 'Toda semana',
+    avisar: 'Avisar-me', a0: 'No mesmo dia', a1: '1 dia antes', a3: '3 dias antes', a7: '1 semana antes', a14: '2 semanas antes', a30: '1 mês antes',
+    avisoHint: 'O aviso aparece no topo, em «Não esqueça», quando você abre o app.',
+    persona: 'De quem? / Grupo (opcional)', personaPh: 'Ex.: Família, Trabalho, Amigos…',
+    wa: 'WhatsApp (opcional)', contactos: '👤 Contatos', telPh: 'Ex.: +55 11 91234 5678',
+    telHint0: 'Com o número, o botão verde abre a conversa direto.', telOk: '✓ Vai abrir a conversa com +{0}', telMal: 'Confira o número: coloque o código do país, por exemplo +{0}.',
+    msg: 'Mensagem de parabéns (opcional)', msgPh: 'Vazio = é enviada a mensagem automática',
+    msgHint: 'Escreva sua própria mensagem. <b>{nome}</b> e <b>{idade}</b> são preenchidos sozinhos.', partir: 'Começar da automática',
+    notas: 'Notas (opcional)', notasPh: 'Ideias de presente, lugar, o que levar…', felicitarWA: 'Dar parabéns pelo WhatsApp', cancelar: 'Cancelar', guardar: 'Salvar',
+    anadirDia: '＋ Adicionar neste dia', nadaDia: 'Nada marcado neste dia.',
+    escribeTitulo: 'Escreva um título', eligeFecha: 'Escolha uma data', actualizado: 'Evento atualizado ✓', guardado: 'Evento salvo ✓',
+    borrar: 'Apagar «{0}»?', borrado: 'Evento apagado', noTel: 'Não foi possível trazer o número: digite à mão', sinTel: 'Esse contato não tem telefone',
+    elegirNum: 'Qual é o WhatsApp?',
+    idioma: 'Idioma', pais: 'País', paisHint: 'Para os feriados, o Dia das Mães e o código de país dos telefones.', otroPais: 'Outro país',
+    apariencia: 'Aparência', claro: '☀️ Claro', oscuro: '🌙 Escuro', auto: 'Automático', estilo: '🎨 Estilo do app',
+    mostrar: 'O que mostrar no calendário', capaFest: '🔴 Feriados', capaCeleb: '🎉 Datas comemorativas (Dia das Mães…)', capaEst: '🌗 Estações e mudança de hora',
+    sinFest: 'Ainda não há feriados para o seu país.',
+    coloresTipo: 'Cores de cada tipo de evento', reset: '↺ Voltar às cores originais', coloresHint: 'As cores ficam salvas neste telefone.', coloresOrig: 'Cores originais',
+    colCeleb: '🎉 Datas comemorativas', colFest: '🔴 Feriados', colEst: '🌗 Estações',
+    copias: 'Cópia de segurança', copiasHint: 'Suas datas ficam salvas só neste telefone. Salve uma cópia de vez em quando (por exemplo no Google Drive) caso troque de celular.',
+    guardarCopia: '💾 Salvar cópia', recuperar: '📂 Recuperar cópia', reemplazar: 'Isto vai trocar os {0} eventos atuais pelos {1} da cópia. Continuar?',
+    restaurada: 'Cópia recuperada ✓', copiaMala: 'Esse arquivo não é uma cópia válida', resumen: '<b>{0}</b> datas · <b>{1}</b> aniversários · <b>{2}</b> com WhatsApp',
+    bienvTitulo: 'Olá! 👋', bienvTexto: 'Anote aniversários e datas importantes e dê parabéns pelo WhatsApp com um toque. Tudo fica salvo só no seu telefone.', empezar: 'Começar',
+    noTeOlvides: '🔔 Não esqueça', hoyNada: 'Hoje, {0}: nada especial', proximo: 'Próximo:', enMes: 'Em {0}', mesVacio: 'Nada marcado em {0}.',
+    anadirEv: '＋ Adicionar evento', vacioTodo: 'Você ainda não adicionou eventos.<br>Comece pelos aniversários 🎂', vacioCum: 'Ainda não há aniversários.', anadirCum: '＋ Adicionar aniversário',
+    cumpleN: ' (faz {0})', festivo: 'Feriado', celebracion: 'Data comemorativa', masN: '+{0} mais',
+    hoyX: 'Hoje!', manana: 'Amanhã', haceD: 'Há {0} d', enD: 'Em {0} dias', enM: 'Em {0} meses',
+    cumpleA: 'Faz {0}', cumpliria: 'Faria {0}', partida: '{0} desde a partida', juntos: '{0} juntos', seCumplen: '{0}', anio: 'ano', anios: 'anos',
+    nuevaVer: 'Há uma versão nova', actualizar: 'Atualizar', tuColor: 'Sua cor', nombreEj: 'Nome',
+    hdrTitulos: { cumple: 'Ex.: Ana', aniversario: 'Ex.: Bodas de casamento', celebracion: 'Ex.: Formatura do Pedro', familiar: 'Ex.: Almoço na casa da avó', recordatorio: 'Ex.: Renovar o passaporte', salud: 'Ex.: Dentista', escuela: 'Ex.: Reunião de pais', recuerdo: 'Ex.: Vovó Maria', otro: 'Ex.: …' },
+  },
+  fr: {
+    app: 'Mon Calendrier', nuevo: '＋ Nouvel événement', mes: 'Mois', proximos: 'À venir', cumples: 'Anniversaires', cumplesCorto: 'Anniv.',
+    ajustes: 'Réglages', hoy: 'Auj.', proxTitulo: 'Événements à venir', proxSub: 'Tout ce qui arrive dans les 12 prochains mois.',
+    cumTitulo: 'Anniversaires', cumSub: 'Le plus proche en premier.', firma: 'Créée par Emmanuel Díaz', privacidad: 'Confidentialité',
+    nuevoEv: 'Nouvel événement', editarEv: 'Modifier l’événement', tipo: 'Type', titulo: 'Titre', quienCumple: 'C’est l’anniversaire de qui ?',
+    fecha: 'Date', hora: 'Heure (facultatif)',
+    anioCumple: 'Je connais l’année de naissance (pour afficher l’âge)', anioRecuerdo: 'Je connais l’année (pour compter les années)', anioOtro: 'Je connais l’année de début (pour compter les années)',
+    repite: 'Se répète', rNo: 'Non, une seule fois', rAnual: 'Chaque année', rMensual: 'Chaque mois', rSemanal: 'Chaque semaine',
+    avisar: 'Me prévenir', a0: 'Le jour même', a1: '1 jour avant', a3: '3 jours avant', a7: '1 semaine avant', a14: '2 semaines avant', a30: '1 mois avant',
+    avisoHint: 'Le rappel apparaît en haut, dans « N’oubliez pas », quand vous ouvrez l’app.',
+    persona: 'De qui ? / Groupe (facultatif)', personaPh: 'Ex. : Famille, Travail, Amis…',
+    wa: 'WhatsApp (facultatif)', contactos: '👤 Contacts', telPh: 'Ex. : +33 6 12 34 56 78',
+    telHint0: 'Avec son numéro, le bouton vert ouvre directement sa conversation.', telOk: '✓ La conversation avec +{0} s’ouvrira', telMal: 'Vérifiez le numéro : ajoutez l’indicatif du pays, par ex. +{0}.',
+    msg: 'Message de vœux (facultatif)', msgPh: 'Vide = le message automatique est envoyé',
+    msgHint: 'Écrivez votre propre message. <b>{nom}</b> et <b>{âge}</b> sont remplis automatiquement.', partir: 'Partir du message automatique',
+    notas: 'Notes (facultatif)', notasPh: 'Idées de cadeau, lieu, quoi apporter…', felicitarWA: 'Souhaiter sur WhatsApp', cancelar: 'Annuler', guardar: 'Enregistrer',
+    anadirDia: '＋ Ajouter ce jour-là', nadaDia: 'Rien de prévu ce jour-là.',
+    escribeTitulo: 'Écrivez un titre', eligeFecha: 'Choisissez une date', actualizado: 'Événement modifié ✓', guardado: 'Événement enregistré ✓',
+    borrar: 'Supprimer « {0} » ?', borrado: 'Événement supprimé', noTel: 'Impossible de récupérer le numéro : saisissez-le', sinTel: 'Ce contact n’a pas de numéro',
+    elegirNum: 'Quel est son WhatsApp ?',
+    idioma: 'Langue', pais: 'Pays', paisHint: 'Pour les jours fériés, la fête des mères et l’indicatif téléphonique.', otroPais: 'Autre pays',
+    apariencia: 'Apparence', claro: '☀️ Clair', oscuro: '🌙 Sombre', auto: 'Automatique', estilo: '🎨 Style de l’app',
+    mostrar: 'Quoi afficher dans le calendrier', capaFest: '🔴 Jours fériés', capaCeleb: '🎉 Fêtes (fête des mères…)', capaEst: '🌗 Saisons et changement d’heure',
+    sinFest: 'Pas encore de jours fériés pour votre pays.',
+    coloresTipo: 'Couleur de chaque type d’événement', reset: '↺ Revenir aux couleurs d’origine', coloresHint: 'Les couleurs sont enregistrées sur ce téléphone.', coloresOrig: 'Couleurs d’origine',
+    colCeleb: '🎉 Fêtes', colFest: '🔴 Jours fériés', colEst: '🌗 Saisons',
+    copias: 'Sauvegarde', copiasHint: 'Vos dates sont enregistrées uniquement sur ce téléphone. Faites une sauvegarde de temps en temps (par exemple sur Google Drive) au cas où vous changeriez de téléphone.',
+    guardarCopia: '💾 Sauvegarder', recuperar: '📂 Restaurer', reemplazar: 'Vos {0} événements seront remplacés par les {1} de la sauvegarde. Continuer ?',
+    restaurada: 'Sauvegarde restaurée ✓', copiaMala: 'Ce fichier n’est pas une sauvegarde valide', resumen: '<b>{0}</b> dates · <b>{1}</b> anniversaires · <b>{2}</b> avec WhatsApp',
+    bienvTitulo: 'Bonjour ! 👋', bienvTexto: 'Notez les anniversaires et les dates importantes, et souhaitez-les sur WhatsApp en un geste. Tout reste sur votre téléphone.', empezar: 'Commencer',
+    noTeOlvides: '🔔 N’oubliez pas', hoyNada: 'Aujourd’hui, {0} : rien de spécial', proximo: 'Prochain :', enMes: 'En {0}', mesVacio: 'Rien de prévu en {0}.',
+    anadirEv: '＋ Ajouter un événement', vacioTodo: 'Vous n’avez encore ajouté aucun événement.<br>Commencez par les anniversaires 🎂', vacioCum: 'Pas encore d’anniversaires.', anadirCum: '＋ Ajouter un anniversaire',
+    cumpleN: ' ({0} ans)', festivo: 'Jour férié', celebracion: 'Fête', masN: '+{0} autres',
+    hoyX: 'Aujourd’hui !', manana: 'Demain', haceD: 'Il y a {0} j', enD: 'Dans {0} jours', enM: 'Dans {0} mois',
+    cumpleA: '{0} ans', cumpliria: 'Aurait eu {0} ans', partida: '{0} depuis son départ', juntos: '{0} ensemble', seCumplen: '{0}', anio: 'an', anios: 'ans',
+    nuevaVer: 'Une nouvelle version est disponible', actualizar: 'Mettre à jour', tuColor: 'Votre couleur', nombreEj: 'Prénom',
+    hdrTitulos: { cumple: 'Ex. : Léa', aniversario: 'Ex. : Anniversaire de mariage', celebracion: 'Ex. : Communion de Paul', familiar: 'Ex. : Déjeuner chez mamie', recordatorio: 'Ex. : Renouveler le passeport', salud: 'Ex. : Dentiste', escuela: 'Ex. : Réunion de parents', recuerdo: 'Ex. : Mamie Jeanne', otro: 'Ex. : …' },
+  },
+  ca: {
+    app: 'El meu Calendari', nuevo: '＋ Nou esdeveniment', mes: 'Mes', proximos: 'Propers', cumples: 'Aniversaris', cumplesCorto: 'Aniversaris',
+    ajustes: 'Configuració', hoy: 'Avui', proxTitulo: 'Propers esdeveniments', proxSub: 'Tot el que ve en els propers 12 mesos.',
+    cumTitulo: 'Aniversaris i noces', cumSub: 'Primer el que arriba abans.', firma: 'Creada per Emmanuel Díaz', privacidad: 'Privadesa',
+    nuevoEv: 'Nou esdeveniment', editarEv: 'Editar l’esdeveniment', tipo: 'Tipus', titulo: 'Títol', quienCumple: 'Qui fa anys?',
+    fecha: 'Data', hora: 'Hora (opcional)',
+    anioCumple: 'Sé l’any de naixement (per mostrar l’edat)', anioRecuerdo: 'Sé l’any (per comptar els anys que han passat)', anioOtro: 'Sé l’any en què va començar (per comptar els anys)',
+    repite: 'Es repeteix', rNo: 'No, només un cop', rAnual: 'Cada any', rMensual: 'Cada mes', rSemanal: 'Cada setmana',
+    avisar: 'Avisa’m', a0: 'El mateix dia', a1: '1 dia abans', a3: '3 dies abans', a7: '1 setmana abans', a14: '2 setmanes abans', a30: '1 mes abans',
+    avisoHint: 'L’avís surt a dalt, a «No te n’oblidis», quan obres l’app.',
+    persona: 'De qui? / Grup (opcional)', personaPh: 'Ex.: Família, Feina, Amics…',
+    wa: 'WhatsApp (opcional)', contactos: '👤 Contactes', telPh: 'Ex.: +376 312 345',
+    telHint0: 'Amb el seu número, el botó verd obre directament el seu xat.', telOk: '✓ S’obrirà el xat de +{0}', telMal: 'Revisa el número: posa-hi el prefix del país, per exemple +{0}.',
+    msg: 'Missatge de felicitació (opcional)', msgPh: 'Buit = s’envia el missatge automàtic',
+    msgHint: 'Escriu el teu propi missatge. <b>{nom}</b> i <b>{edat}</b> es canvien sols.', partir: 'Partir de l’automàtic',
+    notas: 'Notes (opcional)', notasPh: 'Idees de regal, lloc, què cal portar…', felicitarWA: 'Felicitar per WhatsApp', cancelar: 'Cancel·lar', guardar: 'Desar',
+    anadirDia: '＋ Afegir en aquest dia', nadaDia: 'Res apuntat aquest dia.',
+    escribeTitulo: 'Escriu un títol', eligeFecha: 'Tria una data', actualizado: 'Esdeveniment actualitzat ✓', guardado: 'Esdeveniment desat ✓',
+    borrar: 'Esborrar «{0}»?', borrado: 'Esdeveniment esborrat', noTel: 'No s’ha pogut portar el número: escriu-lo a mà', sinTel: 'Aquest contacte no té telèfon',
+    elegirNum: 'Quin és el seu WhatsApp?',
+    idioma: 'Idioma', pais: 'País', paisHint: 'Per als festius, el Dia de la Mare i el prefix dels telèfons.', otroPais: 'Un altre país',
+    apariencia: 'Aparença', claro: '☀️ Clar', oscuro: '🌙 Fosc', auto: 'Automàtic', estilo: '🎨 Estil de l’app',
+    mostrar: 'Què mostrar al calendari', capaFest: '🔴 Dies festius', capaCeleb: '🎉 Celebracions (Dia de la Mare…)', capaEst: '🌗 Estacions i canvi d’hora',
+    sinFest: 'Encara no hi ha festius per al teu país.',
+    coloresTipo: 'Colors de cada tipus d’esdeveniment', reset: '↺ Tornar als colors originals', coloresHint: 'Els colors es desen en aquest telèfon.', coloresOrig: 'Colors originals',
+    colCeleb: '🎉 Celebracions', colFest: '🔴 Festius', colEst: '🌗 Estacions',
+    copias: 'Còpia de seguretat', copiasHint: 'Les teves dates es desen només en aquest telèfon. Desa una còpia de tant en tant (per exemple a Google Drive) per si canvies de mòbil.',
+    guardarCopia: '💾 Desar còpia', recuperar: '📂 Recuperar còpia', reemplazar: 'Això canviarà els {0} esdeveniments actuals pels {1} de la còpia. Vols continuar?',
+    restaurada: 'Còpia recuperada ✓', copiaMala: 'Aquest fitxer no és una còpia vàlida', resumen: '<b>{0}</b> dates · <b>{1}</b> aniversaris · <b>{2}</b> amb WhatsApp',
+    bienvTitulo: 'Hola! 👋', bienvTexto: 'Apunta els aniversaris i les dates importants, i felicita per WhatsApp amb un toc. Tot es desa només al teu telèfon.', empezar: 'Començar',
+    noTeOlvides: '🔔 No te n’oblidis', hoyNada: 'Avui, {0}: res especial', proximo: 'Proper:', enMes: '{0}', mesVacio: 'No hi ha res apuntat aquest mes.',
+    anadirEv: '＋ Afegir esdeveniment', vacioTodo: 'Encara no has afegit esdeveniments.<br>Comença pels aniversaris 🎂', vacioCum: 'Encara no hi ha aniversaris.', anadirCum: '＋ Afegir aniversari',
+    cumpleN: ' (fa {0} anys)', festivo: 'Dia festiu', celebracion: 'Celebració', masN: '+{0} més',
+    hoyX: 'Avui!', manana: 'Demà', haceD: 'Fa {0} d', enD: 'D’aquí a {0} dies', enM: 'D’aquí a {0} mesos',
+    cumpleA: 'Fa {0} anys', cumpliria: 'Faria {0} anys', partida: '{0} des que ens va deixar', juntos: '{0} junts', seCumplen: '{0}', anio: 'any', anios: 'anys',
+    nuevaVer: 'Hi ha una versió nova', actualizar: 'Actualitzar', tuColor: 'El teu color', nombreEj: 'Nom',
+    hdrTitulos: { cumple: 'Ex.: Anna', aniversario: 'Ex.: Aniversari de casament', celebracion: 'Ex.: Comunió del Pau', familiar: 'Ex.: Dinar a casa dels avis', recordatorio: 'Ex.: Renovar el passaport', salud: 'Ex.: Dentista', escuela: 'Ex.: Reunió de pares', recuerdo: 'Ex.: Àvia Carme', otro: 'Ex.: …' },
+  },
+  it: {
+    app: 'Il mio Calendario', nuevo: '＋ Nuovo evento', mes: 'Mese', proximos: 'Prossimi', cumples: 'Compleanni', cumplesCorto: 'Compleanni',
+    ajustes: 'Impostazioni', hoy: 'Oggi', proxTitulo: 'Prossimi eventi', proxSub: 'Tutto quello che arriva nei prossimi 12 mesi.',
+    cumTitulo: 'Compleanni e anniversari', cumSub: 'Prima i più vicini.', firma: 'Creata da Emmanuel Díaz', privacidad: 'Privacy',
+    nuevoEv: 'Nuovo evento', editarEv: 'Modifica evento', tipo: 'Tipo', titulo: 'Titolo', quienCumple: 'Di chi è il compleanno?',
+    fecha: 'Data', hora: 'Ora (facoltativa)',
+    anioCumple: 'So l’anno di nascita (per mostrare l’età)', anioRecuerdo: 'So l’anno (per contare gli anni passati)', anioOtro: 'So l’anno di inizio (per contare gli anni)',
+    repite: 'Si ripete', rNo: 'No, una sola volta', rAnual: 'Ogni anno', rMensual: 'Ogni mese', rSemanal: 'Ogni settimana',
+    avisar: 'Avvisami', a0: 'Il giorno stesso', a1: '1 giorno prima', a3: '3 giorni prima', a7: '1 settimana prima', a14: '2 settimane prima', a30: '1 mese prima',
+    avisoHint: 'Il promemoria appare in alto, in «Non dimenticare», quando apri l’app.',
+    persona: 'Di chi? / Gruppo (facoltativo)', personaPh: 'Es.: Famiglia, Lavoro, Amici…',
+    wa: 'WhatsApp (facoltativo)', contactos: '👤 Contatti', telPh: 'Es.: +39 312 345 6789',
+    telHint0: 'Con il suo numero, il pulsante verde apre subito la sua chat.', telOk: '✓ Si aprirà la chat con +{0}', telMal: 'Controlla il numero: aggiungi il prefisso del paese, ad es. +{0}.',
+    msg: 'Messaggio di auguri (facoltativo)', msgPh: 'Vuoto = viene inviato il messaggio automatico',
+    msgHint: 'Scrivi il tuo messaggio. <b>{nome}</b> e <b>{età}</b> si compilano da soli.', partir: 'Parti da quello automatico',
+    notas: 'Note (facoltative)', notasPh: 'Idee regalo, luogo, cosa portare…', felicitarWA: 'Fai gli auguri su WhatsApp', cancelar: 'Annulla', guardar: 'Salva',
+    anadirDia: '＋ Aggiungi in questo giorno', nadaDia: 'Niente in questo giorno.',
+    escribeTitulo: 'Scrivi un titolo', eligeFecha: 'Scegli una data', actualizado: 'Evento aggiornato ✓', guardado: 'Evento salvato ✓',
+    borrar: 'Eliminare «{0}»?', borrado: 'Evento eliminato', noTel: 'Impossibile prendere il numero: scrivilo a mano', sinTel: 'Questo contatto non ha un numero',
+    elegirNum: 'Qual è il suo WhatsApp?',
+    idioma: 'Lingua', pais: 'Paese', paisHint: 'Per le festività, la Festa della mamma e il prefisso telefonico.', otroPais: 'Altro paese',
+    apariencia: 'Aspetto', claro: '☀️ Chiaro', oscuro: '🌙 Scuro', auto: 'Automatico', estilo: '🎨 Stile dell’app',
+    mostrar: 'Cosa mostrare nel calendario', capaFest: '🔴 Festività', capaCeleb: '🎉 Ricorrenze (Festa della mamma…)', capaEst: '🌗 Stagioni e cambio dell’ora',
+    sinFest: 'Non ci sono ancora festività per il tuo paese.',
+    coloresTipo: 'Colore di ogni tipo di evento', reset: '↺ Torna ai colori originali', coloresHint: 'I colori sono salvati su questo telefono.', coloresOrig: 'Colori originali',
+    colCeleb: '🎉 Ricorrenze', colFest: '🔴 Festività', colEst: '🌗 Stagioni',
+    copias: 'Backup', copiasHint: 'Le tue date sono salvate solo su questo telefono. Fai un backup ogni tanto (per esempio su Google Drive) nel caso cambi telefono.',
+    guardarCopia: '💾 Salva backup', recuperar: '📂 Ripristina backup', reemplazar: 'I tuoi {0} eventi saranno sostituiti dai {1} del backup. Continuare?',
+    restaurada: 'Backup ripristinato ✓', copiaMala: 'Questo file non è un backup valido', resumen: '<b>{0}</b> date · <b>{1}</b> compleanni · <b>{2}</b> con WhatsApp',
+    bienvTitulo: 'Ciao! 👋', bienvTexto: 'Segna compleanni e date importanti e fai gli auguri su WhatsApp con un tocco. Tutto resta solo sul tuo telefono.', empezar: 'Inizia',
+    noTeOlvides: '🔔 Non dimenticare', hoyNada: 'Oggi, {0}: niente di speciale', proximo: 'Prossimo:', enMes: 'A {0}', mesVacio: 'Niente in programma a {0}.',
+    anadirEv: '＋ Aggiungi evento', vacioTodo: 'Non hai ancora aggiunto eventi.<br>Inizia dai compleanni 🎂', vacioCum: 'Ancora nessun compleanno.', anadirCum: '＋ Aggiungi compleanno',
+    cumpleN: ' (compie {0} anni)', festivo: 'Festività', celebracion: 'Ricorrenza', masN: '+{0} altri',
+    hoyX: 'Oggi!', manana: 'Domani', haceD: '{0} g fa', enD: 'Tra {0} giorni', enM: 'Tra {0} mesi',
+    cumpleA: 'Compie {0} anni', cumpliria: 'Compirebbe {0} anni', partida: '{0} dalla sua scomparsa', juntos: '{0} insieme', seCumplen: '{0}', anio: 'anno', anios: 'anni',
+    nuevaVer: 'C’è una nuova versione', actualizar: 'Aggiorna', tuColor: 'Il tuo colore', nombreEj: 'Nome',
+    hdrTitulos: { cumple: 'Es.: Giulia', aniversario: 'Es.: Anniversario di matrimonio', celebracion: 'Es.: Comunione di Luca', familiar: 'Es.: Pranzo dai nonni', recordatorio: 'Es.: Rinnovare il passaporto', salud: 'Es.: Dentista', escuela: 'Es.: Colloquio con gli insegnanti', recuerdo: 'Es.: Nonna Maria', otro: 'Es.: …' },
+  },
+  de: {
+    app: 'Mein Kalender', nuevo: '＋ Neuer Termin', mes: 'Monat', proximos: 'Demnächst', cumples: 'Geburtstage', cumplesCorto: 'Geburtstage',
+    ajustes: 'Einstellungen', hoy: 'Heute', proxTitulo: 'Nächste Termine', proxSub: 'Alles in den nächsten 12 Monaten.',
+    cumTitulo: 'Geburtstage und Jahrestage', cumSub: 'Der nächste zuerst.', firma: 'Erstellt von Emmanuel Díaz', privacidad: 'Datenschutz',
+    nuevoEv: 'Neuer Termin', editarEv: 'Termin bearbeiten', tipo: 'Art', titulo: 'Titel', quienCumple: 'Wer hat Geburtstag?',
+    fecha: 'Datum', hora: 'Uhrzeit (optional)',
+    anioCumple: 'Ich kenne das Geburtsjahr (um das Alter anzuzeigen)', anioRecuerdo: 'Ich kenne das Jahr (um die Jahre zu zählen)', anioOtro: 'Ich kenne das Anfangsjahr (um die Jahre zu zählen)',
+    repite: 'Wiederholen', rNo: 'Nein, nur einmal', rAnual: 'Jedes Jahr', rMensual: 'Jeden Monat', rSemanal: 'Jede Woche',
+    avisar: 'Erinnern', a0: 'Am selben Tag', a1: '1 Tag vorher', a3: '3 Tage vorher', a7: '1 Woche vorher', a14: '2 Wochen vorher', a30: '1 Monat vorher',
+    avisoHint: 'Die Erinnerung erscheint oben unter „Nicht vergessen“, wenn du die App öffnest.',
+    persona: 'Von wem? / Gruppe (optional)', personaPh: 'Z. B. Familie, Arbeit, Freunde…',
+    wa: 'WhatsApp (optional)', contactos: '👤 Kontakte', telPh: 'Z. B. +49 151 23456789',
+    telHint0: 'Mit der Nummer öffnet der grüne Knopf direkt den Chat.', telOk: '✓ Der Chat mit +{0} wird geöffnet', telMal: 'Prüfe die Nummer: mit Ländervorwahl, z. B. +{0}.',
+    msg: 'Glückwunschnachricht (optional)', msgPh: 'Leer = die automatische Nachricht wird gesendet',
+    msgHint: 'Schreib deine eigene Nachricht. <b>{name}</b> und <b>{alter}</b> werden automatisch ersetzt.', partir: 'Von der automatischen ausgehen',
+    notas: 'Notizen (optional)', notasPh: 'Geschenkideen, Ort, was mitbringen…', felicitarWA: 'Per WhatsApp gratulieren', cancelar: 'Abbrechen', guardar: 'Speichern',
+    anadirDia: '＋ An diesem Tag hinzufügen', nadaDia: 'An diesem Tag ist nichts eingetragen.',
+    escribeTitulo: 'Gib einen Titel ein', eligeFecha: 'Wähle ein Datum', actualizado: 'Termin aktualisiert ✓', guardado: 'Termin gespeichert ✓',
+    borrar: '„{0}“ löschen?', borrado: 'Termin gelöscht', noTel: 'Nummer konnte nicht übernommen werden: bitte eintippen', sinTel: 'Dieser Kontakt hat keine Telefonnummer',
+    elegirNum: 'Welche ist die WhatsApp-Nummer?',
+    idioma: 'Sprache', pais: 'Land', paisHint: 'Für Feiertage, Muttertag und die Ländervorwahl.', otroPais: 'Anderes Land',
+    apariencia: 'Darstellung', claro: '☀️ Hell', oscuro: '🌙 Dunkel', auto: 'Automatisch', estilo: '🎨 App-Stil',
+    mostrar: 'Was im Kalender anzeigen', capaFest: '🔴 Feiertage', capaCeleb: '🎉 Anlässe (Muttertag…)', capaEst: '🌗 Jahreszeiten und Zeitumstellung',
+    sinFest: 'Für dein Land gibt es noch keine Feiertage.',
+    coloresTipo: 'Farbe jeder Terminart', reset: '↺ Originalfarben wiederherstellen', coloresHint: 'Die Farben werden auf diesem Telefon gespeichert.', coloresOrig: 'Originalfarben',
+    colCeleb: '🎉 Anlässe', colFest: '🔴 Feiertage', colEst: '🌗 Jahreszeiten',
+    copias: 'Sicherung', copiasHint: 'Deine Termine werden nur auf diesem Telefon gespeichert. Mach ab und zu eine Sicherung (z. B. in Google Drive), falls du das Handy wechselst.',
+    guardarCopia: '💾 Sichern', recuperar: '📂 Wiederherstellen', reemplazar: 'Deine {0} Termine werden durch die {1} der Sicherung ersetzt. Fortfahren?',
+    restaurada: 'Sicherung wiederhergestellt ✓', copiaMala: 'Diese Datei ist keine gültige Sicherung', resumen: '<b>{0}</b> Termine · <b>{1}</b> Geburtstage · <b>{2}</b> mit WhatsApp',
+    bienvTitulo: 'Hallo! 👋', bienvTexto: 'Trag Geburtstage und wichtige Termine ein und gratuliere mit einem Tipp per WhatsApp. Alles bleibt nur auf deinem Telefon.', empezar: 'Los geht’s',
+    noTeOlvides: '🔔 Nicht vergessen', hoyNada: 'Heute, {0}: nichts Besonderes', proximo: 'Nächster:', enMes: 'Im {0}', mesVacio: 'Im {0} ist nichts eingetragen.',
+    anadirEv: '＋ Termin hinzufügen', vacioTodo: 'Du hast noch keine Termine.<br>Fang mit den Geburtstagen an 🎂', vacioCum: 'Noch keine Geburtstage.', anadirCum: '＋ Geburtstag hinzufügen',
+    cumpleN: ' (wird {0})', festivo: 'Feiertag', celebracion: 'Anlass', masN: '+{0} weitere',
+    hoyX: 'Heute!', manana: 'Morgen', haceD: 'vor {0} T.', enD: 'in {0} Tagen', enM: 'in {0} Monaten',
+    cumpleA: 'Wird {0}', cumpliria: 'Wäre {0} geworden', partida: '{0} seit dem Abschied', juntos: '{0} zusammen', seCumplen: '{0}', anio: 'Jahr', anios: 'Jahre',
+    nuevaVer: 'Eine neue Version ist da', actualizar: 'Aktualisieren', tuColor: 'Deine Farbe', nombreEj: 'Name',
+    hdrTitulos: { cumple: 'Z. B. Anna', aniversario: 'Z. B. Hochzeitstag', celebracion: 'Z. B. Kommunion von Paul', familiar: 'Z. B. Essen bei Oma', recordatorio: 'Z. B. Reisepass erneuern', salud: 'Z. B. Zahnarzt', escuela: 'Z. B. Elternabend', recuerdo: 'Z. B. Oma Maria', otro: 'Z. B. …' },
+  },
+};
+const IDIOMAS = CalComun.IDIOMAS;
+function idiomaTel() {
+  for (const l of (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''])) {
+    const c = String(l).slice(0, 2).toLowerCase();
+    if (IDIOMAS[c]) return c;
+  }
+  return 'en';
+}
+let L = IDIOMAS[CFG.idioma] ? CFG.idioma : idiomaTel();
+const t = (k, ...a) => String((T[L] || T.en)[k] ?? T.en[k] ?? T.es[k] ?? k).replace(/\{(\d)\}/g, (_, i) => a[i]);
+const LOCALES = { es: 'es-ES', en: 'en-US', pt: 'pt-BR', fr: 'fr-FR', ca: 'ca-ES', it: 'it-IT', de: 'de-DE' };
+let MESES, MES_C, DIAS, DIAS_C;
+// «— en 2 días» va en minúscula; en alemán no, porque los sustantivos llevan mayúscula («in 2 Tagen»)
+const minus = s => L === 'de' ? s : s.toLowerCase();
+function nombresFechas() {
+  const loc = LOCALES[L] || 'en-US', limpio = s => s.replace(/^(d’|d'|de )/i, '').replace('.', '');
+  MESES = [...Array(12)].map((_, m) => limpio(new Intl.DateTimeFormat(loc, { month: 'long' }).format(new Date(2026, m, 1))));
+  MES_C = [...Array(12)].map((_, m) => limpio(new Intl.DateTimeFormat(loc, { month: 'short' }).format(new Date(2026, m, 1))).slice(0, 3));
+  DIAS = [...Array(7)].map((_, d) => new Intl.DateTimeFormat(loc, { weekday: 'long' }).format(new Date(2026, 0, 4 + d)));   // 4/1/2026 es domingo
+  DIAS_C = [...Array(7)].map((_, d) => new Intl.DateTimeFormat(loc, { weekday: 'short' }).format(new Date(2026, 0, 4 + d)).replace('.', ''));
+}
+function aplicarIdioma() {
+  document.documentElement.lang = L;
+  document.title = t('app');
+  document.querySelectorAll('.sel-idioma').forEach(s => { s.innerHTML = Object.entries(IDIOMAS).map(([c, n]) => `<option value="${c}">${n}</option>`).join(''); s.value = L; });
+  nombresFechas();
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el => el.innerHTML = t(el.dataset.i18nHtml));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.dataset.i18nPh));
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', t(el.dataset.i18nAria)));
+  document.getElementById('f-tel').placeholder = t('telPh');
+}
+function setIdioma(v, enBienvenida) {
+  L = v; CFG.idioma = v; persist(); aplicarIdioma();
+  if (enBienvenida) pintarPaises('b-pais', document.getElementById('b-pais').value);
+  else { pintarAjustesTodo(); }
+  render();
+}
+
+// ══ PAÍS ══ Decide el prefijo de los teléfonos, los festivos, el Día de la Madre/Padre, el cambio de hora y las estaciones.
+const PAISES = CalComun.PAISES;
+function paisTel() {   // el de la región del teléfono (es-ES → ES), si está en la lista
+  const m = ((navigator.languages && navigator.languages[0]) || navigator.language || '').match(/-([A-Z]{2})\b/i);
+  return m && PAISES[m[1].toUpperCase()] ? m[1].toUpperCase() : '';
+}
+function nombrePais(c) {
+  try { return new Intl.DisplayNames([L], { type: 'region' }).of(c); } catch (e) { return c; }
+}
+function pintarPaises(id, sel) {
+  const lista = Object.keys(PAISES).map(c => [c, nombrePais(c)]).sort((a, b) => a[1].localeCompare(b[1], L));
+  document.getElementById(id).innerHTML = lista.map(([c, n]) => `<option value="${c}"${c === sel ? ' selected' : ''}>${esc(n)}</option>`).join('') +
+    `<option value="XX"${sel === 'XX' ? ' selected' : ''}>${esc(t('otroPais'))}</option>`;
+}
+function setPais(c) { CFG.pais = c; persist(); festCache = {}; render(); renderFiltros(); pintarTel(); }
+const PAIS = () => PAISES[CFG.pais] || {};
+function abrirBienvenida() {
+  document.getElementById('b-idioma').value = L;
+  pintarPaises('b-pais', CFG.pais || paisTel() || 'XX');
+  document.getElementById('ov-bienv').classList.add('open');
+}
+function terminarBienvenida() {
+  CFG.idioma = L; setPais(document.getElementById('b-pais').value);
+  closeOv('ov-bienv');
+}
+
+// ══ UTILIDADES DE FECHA ══
+const pad = n => String(n).padStart(2, '0');
+const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const daysIn = (y, m) => new Date(y, m + 1, 0).getDate();
+const diffDays = (a, b) => Math.round((b - a) / 86400000);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const addD = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+const lunesPrimero = () => !['US', 'CA', 'BR'].includes(CFG.pais);   // en EE. UU., Canadá y Brasil la semana empieza en domingo
+const tipoLabel = k => txt((TIPOS[k] || TIPOS.otro).label);
+
+// ══ FESTIVOS, CELEBRACIONES Y ESTACIONES ══ (se calculan en comun.js según el país)
+let festCache = {};
+function capasDelAnio(y) {
+  return festCache[y] ||= {
+    fest: CalComun.festivos(y, CFG.pais), celeb: CalComun.celebraciones(y, CFG.pais), est: CalComun.estaciones(y, CFG.pais),
+  };
+}
+const txt = x => typeof x === 'string' ? x : (x[L] || x.en || x.es);
+const festTipo = f => f.estacion ? txt(f.nota) : f.celeb ? t('celebracion') : txt(f.titulo);
+const festTitulo = f => f.celeb || f.estacion ? txt(f.titulo) : t('festivo');
+const festIcon = f => f.celeb || f.estacion ? f.icon : '🔴';
+let CELEB_COLOR = CalComun.CELEB_COLOR, EST_COLOR = CalComun.EST_COLOR;
+const festColor = f => f.estacion ? EST_COLOR : f.celeb ? CELEB_COLOR : FEST_COLOR;
+const esFestivo = f => !f.celeb && !f.estacion;
+
+// ══ OCURRENCIAS ══ Devuelve [{ev, fecha:Date, edad}] entre start y end (incluidos)
+function occurrences(start, end, incluirOcultos) {
+  const res = [];
+  for (const ev of EVENTS) {
+    if (!incluirOcultos && CFG.ocultos.includes(ev.tipo)) continue;
+    const base = parse(ev.fecha);
+    const push = d => {
+      if (d < base || d < start || d > end) return;
+      const o = { ev, fecha: d };
+      if (ev.anioConocido && ev.repite === 'anual') o.edad = d.getFullYear() - base.getFullYear();
+      res.push(o);
+    };
+    if (ev.repite === 'anual') {
+      for (let y = start.getFullYear(); y <= end.getFullYear(); y++)
+        push(new Date(y, base.getMonth(), Math.min(base.getDate(), daysIn(y, base.getMonth()))));
+    } else if (ev.repite === 'mensual') {
+      for (let y = start.getFullYear(), m = start.getMonth(); y < end.getFullYear() || (y === end.getFullYear() && m <= end.getMonth()); m++) {
+        if (m > 11) { m = 0; y++; }
+        push(new Date(y, m, Math.min(base.getDate(), daysIn(y, m))));
+      }
+    } else if (ev.repite === 'semanal') {
+      let d = new Date(base);
+      if (d < start) d = addD(d, Math.ceil(diffDays(d, start) / 7) * 7);
+      for (; d <= end; d = addD(d, 7)) push(new Date(d));
+    } else push(base);
+  }
+  res.sort((a, b) => a.fecha - b.fecha || (a.ev.hora || '').localeCompare(b.ev.hora || ''));
+  return res;
+}
+function festivosEntre(start, end) {
+  const verFest = !CFG.ocultos.includes('festivo'), verCeleb = !CFG.ocultos.includes('celebraciones'), verEst = !CFG.ocultos.includes('estaciones');
+  const out = [];
+  for (let y = start.getFullYear(); y <= end.getFullYear(); y++) {
+    const c = capasDelAnio(y);
+    [...(verFest ? c.fest : []), ...(verCeleb ? c.celeb : []), ...(verEst ? c.est : [])]
+      .forEach(f => { const d = parse(f.fecha); if (d >= start && d <= end) out.push({ ...f, d }); });
+  }
+  return out;
+}
+
+// ══ TEXTOS ══
+function cuando(d) {
+  const n = diffDays(TODAY, d);
+  if (n === 0) return [t('hoyX'), 'hoy'];
+  if (n === 1) return [t('manana'), 'pronto'];
+  if (n < 0) return [t('haceD', -n), ''];
+  if (n <= 7) return [t('enD', n), 'pronto'];
+  if (n < 60) return [t('enD', n), ''];
+  return [t('enM', Math.round(n / 30.4)), ''];
+}
+const fechaLarga = d => new Intl.DateTimeFormat(LOCALES[L] || 'en-US', { weekday: 'long', day: 'numeric', month: 'long' }).format(d);
+const fechaCorta = d => L === 'en' ? MES_C[d.getMonth()] + ' ' + d.getDate() : d.getDate() + ' ' + MES_C[d.getMonth()];
+function subtitulo(o) {
+  const ev = o.ev, bits = [];
+  const anios = o.edad + ' ' + (o.edad === 1 ? t('anio') : t('anios'));
+  if (o.edad != null) bits.push(ev.tipo === 'cumple' ? t('cumpleA', o.edad) : ev.tipo === 'recuerdo' ? (/cumpleaños|birthday/i.test(ev.titulo) ? t('cumpliria', o.edad) : t('partida', anios)) : /boda|casad|wedding|married/i.test(ev.titulo) ? t('juntos', anios) : t('seCumplen', anios));
+  if (ev.hora) bits.push(ev.hora + (L === 'de' ? ' Uhr' : L === 'en' ? '' : ' h'));
+  if (ev.persona) bits.push(ev.persona);
+  if (ev.notas) bits.push(ev.notas);
+  return bits.join(' · ');
+}
+
+// ══ FELICITAR POR WHATSAPP ══
+// Abre WhatsApp con el mensaje ya escrito. Con número: el chat de esa persona; sin número, WhatsApp pregunta a quién.
+const puedeFelicitar = ev => !!ev && ['cumple', 'aniversario'].includes(ev.tipo);
+function edadProxima(ev) {
+  if (!ev.anioConocido) return null;
+  const o = occurrences(TODAY, addD(TODAY, 366), true).find(x => x.ev.id === ev.id);
+  return o ? o.edad : null;
+}
+// Nombre con el que se saluda: «Ana López» → «Ana», «Tía Rosa» → «Rosa»; «Juan Carlos» y «María José» se quedan enteros.
+const SEGUNDO_NOMBRE = /^(alejandr[ao]|antoni[ao]|carlos|daniel|david|eduardo|enrique|francisc[ao]|jes[uú]s|jos[eé]|javier|luis|manuel|miguel|[aá]ngel|pablo|rafael|ram[oó]n|andr[eé]s|mar[ií]a|isabel|carmen|elena|fernanda|gabriela|valentina|victoria|luc[ií]a|sof[ií]a|paola|andrea)$/i;
+function nombreSaludo(titulo) {
+  const w = titulo.trim().replace(/^(t[ií][ao]|abuel[ao]|prim[ao]|aunt|uncle|grandma|grandpa|cousin|av[óô]|vov[óô]|tante|oncle|mamie|papi|zi[ao]|nonn[ao]|oma|opa|àvia|avi|iaia|iaio)\s+/i, '').split(/\s+/);
+  return w.length > 1 && SEGUNDO_NOMBRE.test(w[1]) ? w[0] + ' ' + w[1] : w[0];
+}
+// Mensajes automáticos por idioma: aniversario, niño (menos de 13 años) y adulto.
+// n = nombre con el que se saluda, e = edad (o null), r = edad redonda (20, 30, 40…)
+const MENSAJES = {
+  es: {
+    aniv: e => `¡Feliz aniversario! 💍❤️\n\n${e ? `¡${e} ${e === 1 ? 'año' : 'años'}! ` : ''}Que este día esté lleno de amor y de recuerdos bonitos. ¡Un abrazo enorme! 🤗`,
+    nino: (n, e) => `¡Feliz cumpleaños, ${n}! 🎂🎈\n\n¡${e} añitos! Que tengas un día precioso, lleno de juegos, risas y sorpresas. ¡Un abrazo muy fuerte! 🤗`,
+    adulto: (n, e, r) => `¡Feliz cumpleaños, ${n}! 🎂🥳\n\n${r ? `¡Felices ${e}! ` : ''}Hoy es tu día y te mereces lo mejor. Te deseo mucha salud, amor y alegría en este nuevo año. ¡Un abrazo muy fuerte! 🤗`,
+  },
+  en: {
+    aniv: e => `Happy anniversary! 💍❤️\n\n${e ? `${e} ${e === 1 ? 'year' : 'years'}! ` : ''}Wishing you a day full of love and beautiful memories. Big hugs! 🤗`,
+    nino: (n, e) => `Happy birthday, ${n}! 🎂🎈\n\n${e} years old! Have a wonderful day full of games, laughter and surprises. Big hugs! 🤗`,
+    adulto: (n, e, r) => `Happy birthday, ${n}! 🎂🥳\n\n${r ? `Happy ${e}th! ` : ''}Today is your day and you deserve the best. Wishing you health, love and happiness this year. Big hugs! 🤗`,
+  },
+  pt: {
+    aniv: e => `Feliz aniversário de casamento! 💍❤️\n\n${e ? `${e} ${e === 1 ? 'ano' : 'anos'}! ` : ''}Que este dia seja cheio de amor e de lembranças bonitas. Um abraço enorme! 🤗`,
+    nino: (n, e) => `Feliz aniversário, ${n}! 🎂🎈\n\n${e} aninhos! Que você tenha um dia lindo, cheio de brincadeiras, risadas e surpresas. Um abraço bem forte! 🤗`,
+    adulto: (n, e, r) => `Feliz aniversário, ${n}! 🎂🥳\n\n${r ? `Parabéns pelos ${e}! ` : ''}Hoje é o seu dia e você merece o melhor. Desejo muita saúde, amor e alegria neste novo ano. Um abraço bem forte! 🤗`,
+  },
+  fr: {
+    aniv: e => `Joyeux anniversaire ! 💍❤️\n\n${e ? `${e} ${e === 1 ? 'an' : 'ans'} ! ` : ''}Que cette journée soit pleine d’amour et de beaux souvenirs. Grosses bises ! 🤗`,
+    nino: (n, e) => `Joyeux anniversaire, ${n} ! 🎂🎈\n\n${e} ans ! Passe une super journée pleine de jeux, de rires et de surprises. Gros bisous ! 🤗`,
+    adulto: (n, e, r) => `Joyeux anniversaire, ${n} ! 🎂🥳\n\n${r ? `Joyeux ${e} ans ! ` : ''}C’est ton jour et tu mérites le meilleur. Je te souhaite beaucoup de santé, d’amour et de bonheur pour cette nouvelle année. Grosses bises ! 🤗`,
+  },
+  ca: {
+    aniv: e => `Per molts anys! 💍❤️\n\n${e ? `${e} ${e === 1 ? 'any' : 'anys'}! ` : ''}Que aquest dia estigui ple d’amor i de records bonics. Una abraçada molt gran! 🤗`,
+    nino: (n, e) => `Per molts anys, ${n}! 🎂🎈\n\n${e} anys! Que tinguis un dia preciós, ple de jocs, rialles i sorpreses. Una abraçada molt forta! 🤗`,
+    adulto: (n, e, r) => `Per molts anys, ${n}! 🎂🥳\n\n${r ? `Felicitats pels ${e}! ` : ''}Avui és el teu dia i et mereixes el millor. Et desitjo molta salut, amor i alegria en aquest nou any. Una abraçada molt forta! 🤗`,
+  },
+  it: {
+    aniv: e => `Buon anniversario! 💍❤️\n\n${e ? `${e} ${e === 1 ? 'anno' : 'anni'}! ` : ''}Che questa giornata sia piena d’amore e di bei ricordi. Un abbraccio enorme! 🤗`,
+    nino: (n, e) => `Buon compleanno, ${n}! 🎂🎈\n\n${e} anni! Passa una giornata bellissima, piena di giochi, risate e sorprese. Un abbraccio fortissimo! 🤗`,
+    adulto: (n, e, r) => `Buon compleanno, ${n}! 🎂🥳\n\n${r ? `Tanti auguri per i tuoi ${e} anni! ` : ''}Oggi è il tuo giorno e meriti il meglio. Ti auguro tanta salute, amore e felicità per questo nuovo anno. Un abbraccio forte! 🤗`,
+  },
+  de: {
+    aniv: e => `Alles Gute zum Jahrestag! 💍❤️\n\n${e ? `${e} ${e === 1 ? 'Jahr' : 'Jahre'}! ` : ''}Ich wünsche euch einen Tag voller Liebe und schöner Erinnerungen. Fühlt euch gedrückt! 🤗`,
+    nino: (n, e) => `Alles Gute zum Geburtstag, ${n}! 🎂🎈\n\n${e} Jahre! Hab einen wunderschönen Tag voller Spiele, Lachen und Überraschungen. Fühl dich ganz fest gedrückt! 🤗`,
+    adulto: (n, e, r) => `Alles Gute zum Geburtstag, ${n}! 🎂🥳\n\n${r ? `Herzlichen Glückwunsch zum ${e}.! ` : ''}Heute ist dein Tag und du verdienst das Beste. Ich wünsche dir viel Gesundheit, Liebe und Freude im neuen Lebensjahr. Fühl dich gedrückt! 🤗`,
+  },
+};
+function mensajeAuto(ev, edad) {
+  const m = MENSAJES[L] || MENSAJES.en, n = nombreSaludo(ev.titulo);
+  if (ev.tipo === 'aniversario') return m.aniv(edad);
+  if (edad != null && edad < 13) return m.nino(n, edad);
+  return m.adulto(n, edad, edad != null && edad >= 20 && edad % 10 === 0);
+}
+// Mensaje propio de la persona (campo «Mensaje para felicitar») o, si está vacío, el automático.
+// {nombre}/{edad} se pueden escribir en cualquiera de los idiomas de la app.
+function mensajeFinal(ev) {
+  const edad = edadProxima(ev);
+  if (!(ev.mensaje || '').trim()) return mensajeAuto(ev, edad);
+  return ev.mensaje.replace(/\{(nombre|name|nome|nom)\}/gi, nombreSaludo(ev.titulo)).replace(/\{(edad|age|idade|âge|edat|età|alter)\}/gi, edad != null ? edad : '');
+}
+function felicitar(id) {
+  const ev = EVENTS.find(e => e.id === id);
+  if (!puedeFelicitar(ev)) return;
+  window.open('https://wa.me/' + waNumero(ev.telefono) + '?text=' + encodeURIComponent(mensajeFinal(ev)), '_blank');
+}
+function partirDelAutomatico() {
+  const titulo = document.getElementById('f-titulo').value.trim() || t('nombreEj');
+  const ev = { ...(EVENTS.find(e => e.id === editId) || {}), tipo: selTipo, titulo,
+    fecha: document.getElementById('f-fecha').value || iso(TODAY), repite: document.getElementById('f-repite').value,
+    anioConocido: document.getElementById('f-anio').checked };
+  document.getElementById('f-msg').value = mensajeAuto(ev, edadProxima(ev));
+}
+// Número para wa.me: solo dígitos y con prefijo de país. Con «+» o «00» se respeta;
+// si no, se le pone el prefijo del país elegido (quitando el 0 de delante, salvo en Italia).
+// Devuelve '' si no parece un número válido.
+function waNumero(tel) {
+  const s = String(tel || '').replace(/[^\d+]/g, '');   // fuera espacios, guiones y marcas invisibles de Contactos
+  let d = s.replace(/\D/g, '');
+  if (s.startsWith('00')) d = d.slice(2);
+  if (s.startsWith('+') || s.startsWith('00')) return d.length >= 8 ? d : '';
+  const pre = PAIS().tel;
+  if (!pre || d.length < 6) return '';
+  if (CFG.pais !== 'IT') d = d.replace(/^0/, '');
+  return d.startsWith(pre) && d.length >= 10 ? d : pre + d;
+}
+// Botón «👤 Contactos»: abre la agenda del teléfono (Contact Picker de Chrome en Android) y se elige a la persona.
+// Trae su nombre (si el título está vacío) y su número; si tiene varios, se elige cuál es el de WhatsApp.
+// Donde el navegador no lo permite, el botón no sale y el número se escribe a mano.
+const hayContactos = 'contacts' in navigator && 'select' in navigator.contacts;
+async function traerTel() {
+  try {
+    const [c] = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+    if (!c) return;
+    const titulo = document.getElementById('f-titulo');
+    if (!titulo.value.trim() && c.name && c.name[0]) titulo.value = c.name[0];
+    const tels = [...new Map((c.tel || []).map(x => [x.replace(/[^\d+]/g, ''), x.replace(/[‎‏‪-‮]/g, '').trim()])).values()].filter(Boolean);
+    if (!tels.length) { toast(t('sinTel')); return; }
+    if (tels.length === 1) return ponerTel(tels[0]);
+    document.getElementById('tel-opc').innerHTML = tels.map(x => `<button class="btn" onclick="ponerTel('${esc(x)}');closeOv('ov-tel')">📞 ${esc(x)}</button>`).join('');
+    abrirHoja('ov-tel');
+  } catch (e) { toast(t('noTel')); }
+}
+function ponerTel(x) { document.getElementById('f-tel').value = x; pintarTel(); }
+function pintarTel() {
+  document.getElementById('f-tel-btn').hidden = !hayContactos;
+  const tel = document.getElementById('f-tel').value.trim(), n = waNumero(tel);
+  document.getElementById('f-tel-hint').textContent = !tel ? t('telHint0') : n ? t('telOk', n) : t('telMal', PAIS().tel || '34');
+}
+const WA_SVG = `<svg class="wa-ico" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 3C8.8 3 3 8.7 3 15.8c0 2.5.7 4.9 2 6.9L3.2 29l6.5-1.7c1.9 1 4.1 1.6 6.3 1.6 7.2 0 13-5.7 13-12.8S23.2 3 16 3zm0 23.5c-2 0-3.9-.5-5.6-1.5l-.4-.2-3.9 1 1-3.7-.3-.4c-1.1-1.7-1.7-3.8-1.7-5.9C5.1 9.9 10 5.2 16 5.2s10.9 4.7 10.9 10.6S22 26.5 16 26.5z"/><path fill="currentColor" d="M22 19.1c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.7s1.2 3.2 1.4 3.4c.2.2 2.4 3.6 5.8 5 .8.3 1.4.5 1.9.7.8.3 1.5.2 2.1.1.6-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.3-.6-.4z"/></svg>`;
+// grande = verde lleno (en los próximos 7 días); si no, discreto para no llenar la lista de verde
+const botonWA = (ev, grande = true) => puedeFelicitar(ev) ? `<button class="wa${grande ? '' : ' discreto'}" title="${esc(t('felicitarWA'))}" onclick="event.stopPropagation();felicitar('${ev.id}')">${WA_SVG}</button>` : '';
+
+function evRow(o, showCuando = true) {
+  const tp = TIPOS[o.ev.tipo] || TIPOS.otro, [tx, cls] = cuando(o.fecha), n = diffDays(TODAY, o.fecha);
+  return `<div class="ev-row" style="--c:${tp.color}" onclick="openForm('${o.ev.id}')">
+    <div class="date-badge"><div class="d">${o.fecha.getDate()}</div><div class="m">${MES_C[o.fecha.getMonth()]}</div></div>
+    <div class="ev-main"><div class="ev-t">${tp.icon} ${esc(o.ev.titulo)}</div><div class="ev-s">${showCuando ? `<span class="when ${cls}">${tx}</span>` : ''}${esc(subtitulo(o)) || tipoLabel(o.ev.tipo)}</div></div>
+    ${botonWA(o.ev, n >= 0 && n <= 7)}</div>`;
+}
+function festRow(f) {
+  return `<div class="ev-row" style="--c:${festColor(f)};cursor:default">
+    <div class="date-badge"><div class="d">${f.d.getDate()}</div><div class="m">${MES_C[f.d.getMonth()]}</div></div>
+    <div class="ev-main"><div class="ev-t">${festIcon(f)} ${esc(festTitulo(f))}</div><div class="ev-s" style="white-space:normal">${esc(festTipo(f))}</div></div></div>`;
+}
+
+// ══ RENDER ══
+function render() {
+  try {
+    if (page === 'mes') renderMes();
+    if (page === 'proximos') renderProximos();
+    if (page === 'cumples') renderCumples();
+  } catch (e) {
+    console.error(e);
+    document.getElementById('upd-banner').hidden = false;
+  }
+  document.getElementById('personas').innerHTML = [...new Set(EVENTS.map(e => e.persona).filter(Boolean))].map(p => `<option value="${esc(p)}">`).join('');
+}
+
+// Capas que se pueden ocultar (los eventos propios siempre se ven)
+const CAPAS = [['festivo', 'capaFest'], ['celebraciones', 'capaCeleb'], ['estaciones', 'capaEst']];
+CFG.ocultos = CFG.ocultos.filter(k => CAPAS.some(c => c[0] === k));
+function renderFiltros() {
+  const sinFest = !CalComun.festivos(TODAY.getFullYear(), CFG.pais).length;
+  document.getElementById('filtros').innerHTML = CAPAS.map(([k, key]) =>
+    `<label class="chk"><input type="checkbox" ${CFG.ocultos.includes(k) ? '' : 'checked'} onchange="toggleFiltro('${k}')"> ${t(key)}</label>`).join('') +
+    (sinFest ? `<p class="hint" style="margin:0">${t('sinFest')}</p>` : '');
+}
+function toggleFiltro(k) {
+  CFG.ocultos = CFG.ocultos.includes(k) ? CFG.ocultos.filter(x => x !== k) : [...CFG.ocultos, k];
+  persist(); render();
+}
+
+function renderMes() {
+  // Avisos: eventos cuya ventana de aviso incluye hoy
+  const lejos = addD(TODAY, 31);
+  const av = occurrences(TODAY, lejos).filter(o => diffDays(TODAY, o.fecha) <= (o.ev.aviso ?? 0));
+  const avEst = festivosEntre(TODAY, addD(TODAY, 7)).filter(f => f.estacion && diffDays(TODAY, f.d) <= f.aviso);
+  document.getElementById('avisos').innerHTML = av.length + avEst.length ? `<div class="avisos"><div class="avisos-t">${t('noTeOlvides')}</div>${av.map(o => {
+    const tp = TIPOS[o.ev.tipo] || TIPOS.otro, [tx] = cuando(o.fecha);
+    return `<div class="aviso" onclick="openForm('${o.ev.id}')">${tp.icon} <b>${esc(o.ev.titulo)}</b> — ${minus(tx)}${o.edad != null && o.ev.tipo === 'cumple' ? t('cumpleN', o.edad) : ''}${botonWA(o.ev)}</div>`;
+  }).join('')}${avEst.map(f => `<div class="aviso" onclick="openDay('${f.fecha}')">${f.icon} <b>${esc(txt(f.titulo))}</b> — ${minus(cuando(f.d)[0])}</div>`).join('')}</div>` : '';
+
+  // Resumen (si hay algo en «No te olvides», no se repite aquí)
+  const prox = occurrences(TODAY, addD(TODAY, 366), true);
+  const hoy = prox.filter(o => diffDays(TODAY, o.fecha) === 0);
+  const proxEv = prox.find(o => diffDays(TODAY, o.fecha) > 0);
+  document.getElementById('hero').innerHTML = hoy.length || av.length ? '' :
+    `<div class="franja"><span class="franja-hoy" onclick="openDay('${iso(TODAY)}')">${t('hoyNada', fechaCorta(TODAY))}</span>` +
+    (proxEv ? `<span class="franja-prox" onclick="openForm('${proxEv.ev.id}')">${t('proximo')} ${(TIPOS[proxEv.ev.tipo] || TIPOS.otro).icon} <b>${esc(proxEv.ev.titulo)}</b> ${minus(cuando(proxEv.fecha)[0])}</span>` : '') + `</div>`;
+
+  // Cuadrícula
+  const lun = lunesPrimero();
+  document.getElementById('cal-head').innerHTML = [...Array(7)].map((_, i) => `<div>${DIAS_C[(i + (lun ? 1 : 0)) % 7]}</div>`).join('');
+  document.getElementById('cal-title').textContent = MESES[viewM] + ' ' + viewY;
+  const first = new Date(viewY, viewM, 1);
+  const start = addD(first, -((first.getDay() + (lun ? 6 : 0)) % 7));
+  const end = addD(start, 41);
+  const occ = occurrences(start, end);
+  const fest = festivosEntre(start, end);
+  const byDay = {}, festDay = {};
+  occ.forEach(o => (byDay[iso(o.fecha)] ||= []).push(o));
+  fest.forEach(f => (festDay[f.fecha] ||= []).push(f));
+  let html = '';
+  for (let i = 0; i < 42; i++) {
+    const d = addD(start, i), k = iso(d), evs = byDay[k] || [], fs = festDay[k] || [];
+    if (i === 35 && d.getMonth() !== viewM) break; // no pintar 6ª fila vacía
+    const cls = ['cell', d.getMonth() !== viewM && 'other', +d === +TODAY && 'today', (d.getDay() % 6 === 0) && 'weekend', fs.some(esFestivo) && 'holiday'].filter(Boolean).join(' ');
+    const items = [...evs.map(o => { const tp = TIPOS[o.ev.tipo] || TIPOS.otro; return `<span class="pill" style="--c:${tp.color}">${tp.icon} ${esc(o.ev.titulo)}</span>`; }),
+                   ...fs.map(f => `<span class="pill" style="--c:${festColor(f)}">${festIcon(f)} ${esc(festTitulo(f))}</span>`)];
+    // En el móvil: mini iconos (🎂, 💍, 🌸…); los festivos ya van en rojo
+    const marcas = [...evs.map(o => (TIPOS[o.ev.tipo] || TIPOS.otro).icon), ...fs.filter(f => !esFestivo(f)).map(festIcon)];
+    const dots = marcas.slice(0, 2).map(m => `<b>${m}</b>`).join('') + (marcas.length > 2 ? `<small>+${marcas.length - 2}</small>` : '');
+    html += `<div class="${cls}" onclick="openDay('${k}')"><div class="dnum">${d.getDate()}</div>${items.slice(0, 3).join('')}${items.length > 3 ? `<div class="more">${t('masN', items.length - 3)}</div>` : ''}<div class="dots">${dots}</div></div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+
+  // Lista del mes
+  const mStart = new Date(viewY, viewM, 1), mEnd = new Date(viewY, viewM, daysIn(viewY, viewM));
+  const rows = [...occurrences(mStart, mEnd).map(o => ({ d: o.fecha, h: evRow(o) })), ...festivosEntre(mStart, mEnd).map(f => ({ d: f.d, h: festRow(f) }))].sort((a, b) => a.d - b.d);
+  document.getElementById('mes-list-title').textContent = t('enMes', MESES[viewM]);
+  document.getElementById('mes-list').innerHTML = rows.length ? rows.map(r => r.h).join('')
+    : `<div class="empty">${t('mesVacio', MESES[viewM])}<br><button class="btn primary small" onclick="openForm()">${t('anadirEv')}</button></div>`;
+}
+
+function renderProximos() {
+  const end = addD(TODAY, 365);
+  const occ = occurrences(TODAY, end);
+  const rows = [...occ.map(o => ({ d: o.fecha, h: evRow(o) })), ...festivosEntre(TODAY, end).map(f => ({ d: f.d, h: festRow(f) }))].sort((a, b) => a.d - b.d);
+  const vacio = occ.length ? '' : `<div class="sc"><div class="empty">${t('vacioTodo')}<br><button class="btn primary small" onclick="openForm()">${t('anadirEv')}</button></div></div>`;
+  const groups = {};
+  rows.forEach(r => (groups[r.d.getFullYear() + '-' + pad(r.d.getMonth())] ||= []).push(r.h));
+  document.getElementById('prox-list').innerHTML = vacio +
+    Object.entries(groups).map(([k, hs]) => { const [y, m] = k.split('-').map(Number);
+      return `<div class="sc"><div class="sc-hdr"><div class="sc-title">${MESES[m]} ${y}</div><div class="sc-title">${hs.length}</div></div>${hs.join('')}</div>`; }).join('');
+}
+
+function renderCumples() {
+  const occ = occurrences(TODAY, addD(TODAY, 366), true).filter(o => o.ev.repite === 'anual' && ['cumple', 'aniversario', 'recuerdo'].includes(o.ev.tipo));
+  const seen = new Set(), list = occ.filter(o => !seen.has(o.ev.id) && seen.add(o.ev.id));
+  document.getElementById('cumple-list').innerHTML = `<div class="sc">${list.length ? list.map(o => evRow(o)).join('')
+    : `<div class="empty">${t('vacioCum')}<br><button class="btn primary small" onclick="openForm(null,null,'cumple')">${t('anadirCum')}</button></div>`}</div>`;
+}
+
+// ══ NAVEGACIÓN ══
+function go(p) {
+  page = p;
+  document.querySelectorAll('.page').forEach(x => x.classList.toggle('active', x.id === 'page-' + p));
+  document.querySelectorAll('[data-page]').forEach(x => x.classList.toggle('active', x.dataset.page === p));
+  if (p !== 'mes') ponerGuarda();
+  render(); window.scrollTo(0, 0);
+}
+function moveMonth(n) { viewM += n; if (viewM < 0) { viewM = 11; viewY--; } if (viewM > 11) { viewM = 0; viewY++; } renderMes(); }
+function goToday() { viewY = TODAY.getFullYear(); viewM = TODAY.getMonth(); renderMes(); }
+// Deslizar en el calendario para cambiar de mes
+(() => { let x0 = null; const g = () => document.getElementById('cal-grid');
+  document.addEventListener('touchstart', e => { x0 = g().contains(e.target) ? e.touches[0].clientX : null; }, { passive: true });
+  document.addEventListener('touchend', e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 60) moveMonth(dx < 0 ? 1 : -1); x0 = null; });
+})();
+// Botón «atrás» de Android: cierra la hoja de arriba (o vuelve a «Mes») en vez de salir de la app.
+// Mientras haya algo que cerrar, el historial guarda una entrada de más («guarda») que se gasta al pulsar atrás.
+let guarda = false;
+function ponerGuarda() { if (!guarda) { history.pushState({ guarda: 1 }, ''); guarda = true; } }
+function abrirHoja(id) { document.getElementById(id).classList.add('open'); ponerGuarda(); }
+window.addEventListener('popstate', () => {
+  guarda = false;
+  const abiertas = [...document.querySelectorAll('.ov.open')].filter(o => o.id !== 'ov-bienv');
+  if (abiertas.length) {
+    abiertas[abiertas.length - 1].classList.remove('open');
+    if (abiertas.length > 1 || page !== 'mes') ponerGuarda();
+  } else if (page !== 'mes') go('mes');
+});
+
+// ══ HOJA DEL DÍA ══
+function openDay(k) {
+  const d = parse(k);
+  const occ = occurrences(d, d), fest = festivosEntre(d, d);
+  document.getElementById('day-title').textContent = fechaLarga(d).replace(/^./, c => c.toUpperCase());
+  document.getElementById('day-list').innerHTML = [
+    ...fest.map(f => `<div class="day-ev" style="--c:${festColor(f)};cursor:default"><span class="e">${festIcon(f)}</span><div style="min-width:0"><div class="ev-t">${esc(festTitulo(f))}</div><div class="ev-s" style="white-space:normal">${esc(festTipo(f))}</div></div></div>`),
+    ...occ.map(o => { const tp = TIPOS[o.ev.tipo] || TIPOS.otro;
+      return `<div class="day-ev" style="--c:${tp.color}" onclick="closeOv('ov-day');openForm('${o.ev.id}')"><span class="e">${tp.icon}</span><div style="min-width:0"><div class="ev-t">${esc(o.ev.titulo)}</div><div class="ev-s" style="white-space:normal">${esc(subtitulo(o)) || tipoLabel(o.ev.tipo)}</div></div></div>`; })
+  ].join('') || `<div class="empty" style="padding:14px">${t('nadaDia')}</div>`;
+  const add = document.getElementById('day-add');
+  add.textContent = t('anadirDia'); add.onclick = () => { closeOv('ov-day'); openForm(null, k); };
+  abrirHoja('ov-day');
+}
+
+// ══ FORMULARIO ══
+function renderTipos() {
+  document.getElementById('f-tipos').innerHTML = Object.entries(TIPOS).map(([k, tp]) =>
+    `<div class="tipo ${k === selTipo ? 'sel' : ''}" style="--c:${tp.color}" onclick="pickTipo('${k}')"><span class="e">${tp.icon}</span>${tipoLabel(k)}</div>`).join('');
+  const anual = ['cumple', 'aniversario', 'recuerdo'].includes(selTipo), felicita = ['cumple', 'aniversario'].includes(selTipo);
+  document.getElementById('f-anio-wrap').style.display = anual ? '' : 'none';
+  document.getElementById('f-tel-wrap').style.display = felicita ? '' : 'none';
+  document.getElementById('f-msg-wrap').style.display = felicita ? '' : 'none';
+  document.getElementById('f-anio-txt').textContent = t(selTipo === 'cumple' ? 'anioCumple' : selTipo === 'recuerdo' ? 'anioRecuerdo' : 'anioOtro');
+  document.getElementById('f-titulo').placeholder = ((T[L] || T.en).hdrTitulos)[selTipo] || '';
+  document.getElementById('f-titulo-lbl').textContent = t(selTipo === 'cumple' ? 'quienCumple' : 'titulo');
+}
+function pickTipo(k) {
+  selTipo = k; const tp = TIPOS[k];
+  if (!editId) { document.getElementById('f-repite').value = tp.anual ? 'anual' : 'no'; document.getElementById('f-aviso').value = tp.aviso; }
+  renderTipos();
+}
+function openForm(id, fecha, tipo) {
+  editId = id || null;
+  const ev = id ? EVENTS.find(e => e.id === id) : null;
+  selTipo = ev ? ev.tipo : (tipo || 'cumple');
+  const tp = TIPOS[selTipo];
+  document.getElementById('form-title').textContent = t(ev ? 'editarEv' : 'nuevoEv');
+  document.getElementById('f-titulo').value = ev ? ev.titulo : '';
+  document.getElementById('f-fecha').value = ev ? ev.fecha : (fecha || iso(TODAY));
+  document.getElementById('f-hora').value = ev?.hora || '';
+  document.getElementById('f-anio').checked = ev ? !!ev.anioConocido : false;
+  document.getElementById('f-repite').value = ev ? ev.repite : (tp.anual ? 'anual' : 'no');
+  document.getElementById('f-aviso').value = ev ? (ev.aviso ?? 0) : tp.aviso;
+  document.getElementById('f-persona').value = ev?.persona || '';
+  document.getElementById('f-notas').value = ev?.notas || '';
+  document.getElementById('f-tel').value = ev?.telefono || '';
+  document.getElementById('f-msg').value = ev?.mensaje || '';
+  pintarTel();
+  document.getElementById('f-del').style.display = ev ? '' : 'none';
+  document.getElementById('f-wa').style.display = puedeFelicitar(ev) ? '' : 'none';
+  renderTipos();
+  abrirHoja('ov-form');
+  if (!ev && window.innerWidth > 768) setTimeout(() => document.getElementById('f-titulo').focus(), 50);
+}
+function saveEvent() {
+  const titulo = document.getElementById('f-titulo').value.trim();
+  const fecha = document.getElementById('f-fecha').value;
+  if (!titulo) { toast(t('escribeTitulo')); document.getElementById('f-titulo').focus(); return; }
+  if (!fecha) { toast(t('eligeFecha')); return; }
+  const felicita = ['cumple', 'aniversario'].includes(selTipo);
+  const data = {
+    id: editId || uid(), tipo: selTipo, titulo, fecha,
+    hora: document.getElementById('f-hora').value || '',
+    repite: document.getElementById('f-repite').value,
+    aviso: Number(document.getElementById('f-aviso').value),
+    anioConocido: ['cumple', 'aniversario', 'recuerdo'].includes(selTipo) && document.getElementById('f-anio').checked,
+    persona: document.getElementById('f-persona').value.trim(),
+    notas: document.getElementById('f-notas').value.trim(),
+    telefono: felicita ? document.getElementById('f-tel').value.trim() : '',
+    mensaje: felicita ? document.getElementById('f-msg').value.trim() : '',
+  };
+  const i = EVENTS.findIndex(e => e.id === data.id);
+  if (i >= 0) EVENTS[i] = data; else EVENTS.push(data);
+  persist(); render();
+  closeOv('ov-form');
+  toast(t(editId ? 'actualizado' : 'guardado'));
+}
+function delEvent() {
+  const ev = EVENTS.find(e => e.id === editId);
+  if (!ev || !confirm(t('borrar', ev.titulo))) return;
+  EVENTS = EVENTS.filter(e => e.id !== ev.id);
+  persist(); render();
+  closeOv('ov-form'); toast(t('borrado'));
+}
+function closeOv(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.ov.open').forEach(o => o.id !== 'ov-bienv' && closeOv(o.id));
+  if (e.key === 'Enter' && document.getElementById('ov-form').classList.contains('open') && e.target.tagName === 'INPUT') saveEvent();
+});
+
+// ══ AJUSTES ══
+function openAjustes() { pintarAjustesTodo(); abrirHoja('ov-aj'); }
+function pintarAjustesTodo() { renderTemas(); renderColores(); renderFiltros(); pintarAjustes(); }
+function pintarAjustes() {
+  const cumples = EVENTS.filter(e => e.tipo === 'cumple'), conTel = EVENTS.filter(e => puedeFelicitar(e) && waNumero(e.telefono)).length;
+  document.getElementById('aj-quien').innerHTML = t('resumen', EVENTS.length, cumples.length, conTel);
+  document.getElementById('aj-idioma').value = L;
+  pintarPaises('aj-pais', CFG.pais || 'XX');
+  const pref = store.get('micalendario_tema') || 'auto';
+  document.querySelectorAll('#seg-tema button').forEach(b => b.classList.toggle('sel', b.dataset.t === pref));
+}
+function setApariencia(v) { store.set('micalendario_tema', v); applyTheme(); pintarAjustes(); }
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { if ((store.get('micalendario_tema') || 'auto') === 'auto') applyTheme(); });
+function applyTheme() {
+  const pref = store.get('micalendario_tema') || 'auto';
+  const th = pref === 'auto' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : pref;
+  document.documentElement.dataset.theme = th;
+  document.getElementById('theme-btn').textContent = th === 'dark' ? '☀️' : '🌙';
+  applyEstilo(); applyColores();
+}
+function toggleTheme() {
+  store.set('micalendario_tema', document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+  applyTheme();
+}
+
+// ══ COLORES ══ Estilos ya hechos: tinte de fondos, cabecera (2 tonos) y acento (2 tonos)
+const TEMAS = {
+  lavanda: { nombre: { es: 'Lavanda', en: 'Lavender', pt: 'Lavanda', fr: 'Lavande', ca: 'Lavanda', it: 'Lavanda', de: 'Lavendel' }, tint: '#7b5fae', hdr1: '#5d4b80', hdr2: '#7c67a3', acento: '#f72585', acento2: '#b5179e' },
+  rosa:    { nombre: { es: 'Rosa', en: 'Pink', pt: 'Rosa', fr: 'Rose', ca: 'Rosa', it: 'Rosa', de: 'Rosa' },                         tint: '#c26a93', hdr1: '#8f3d66', hdr2: '#bf5f8c', acento: '#e8467f', acento2: '#b8306b' },
+  vino:    { nombre: { es: 'Vino', en: 'Wine', pt: 'Vinho', fr: 'Bordeaux', ca: 'Vi', it: 'Vino', de: 'Wein' },                      tint: '#9a5563', hdr1: '#5e2533', hdr2: '#8a3a4c', acento: '#d6336c', acento2: '#a51d4f' },
+  durazno: { nombre: { es: 'Durazno', en: 'Peach', pt: 'Pêssego', fr: 'Pêche', ca: 'Préssec', it: 'Pesca', de: 'Pfirsich' },         tint: '#c8876a', hdr1: '#8c4a33', hdr2: '#c06a48', acento: '#ef6b3f', acento2: '#c64b28' },
+  menta:   { nombre: { es: 'Menta', en: 'Mint', pt: 'Menta', fr: 'Menthe', ca: 'Menta', it: 'Menta', de: 'Minze' },                  tint: '#4c9a84', hdr1: '#28604f', hdr2: '#3f8a73', acento: '#12a57a', acento2: '#0c7a5a' },
+  oceano:  { nombre: { es: 'Océano', en: 'Ocean', pt: 'Oceano', fr: 'Océan', ca: 'Oceà', it: 'Oceano', de: 'Ozean' },                tint: '#4a82b0', hdr1: '#274f78', hdr2: '#3f7bab', acento: '#1d8be0', acento2: '#1463ad' },
+  grafito: { nombre: { es: 'Grafito', en: 'Graphite', pt: 'Grafite', fr: 'Graphite', ca: 'Grafit', it: 'Grafite', de: 'Graphit' },  tint: '#6e7585', hdr1: '#343945', hdr2: '#555c6c', acento: '#7064ff', acento2: '#4c43d1' },
+};
+const hex2rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mezcla = (a, b, p) => '#' + hex2rgb(a).map((v, i) => Math.round(v * (1 - p) + hex2rgb(b)[i] * p).toString(16).padStart(2, '0')).join('');  // p = cuánto de b
+const luz = h => { const [r, g, b] = hex2rgb(h); return (0.299 * r + 0.587 * g + 0.114 * b) / 255; };
+// «Tu color»: a partir de un solo color; cabecera y acento más oscuros para que el texto blanco se lea
+function temaDesde(c) {
+  const os = '#1a1726', claro = luz(c) > .6;
+  return { tint: c, hdr1: mezcla(c, os, .5), hdr2: mezcla(c, os, claro ? .4 : .2), acento: mezcla(c, '#000000', claro ? .35 : .08), acento2: mezcla(c, os, .4) };
+}
+function applyEstilo() {
+  const tm = CFG.tema === 'propio' && CFG.propio ? temaDesde(CFG.propio) : TEMAS[CFG.tema] || TEMAS.lavanda;
+  const st = document.documentElement.style;
+  [['--tint', tm.tint], ['--hdr1', tm.hdr1], ['--hdr2', tm.hdr2], ['--pink', tm.acento], ['--pink2', tm.acento2]].forEach(([k, v]) => st.setProperty(k, v));
+  // Barra de estado del móvil del mismo color que la cabecera
+  document.querySelector('meta[name=theme-color]').content = document.documentElement.dataset.theme === 'dark' ? mezcla(tm.hdr1, '#1b1b26', .4) : tm.hdr1;
+}
+const bolaCss = tm => `linear-gradient(135deg,${tm.hdr1},${tm.hdr2} 55%,${tm.acento})`;
+function renderTemas() {
+  document.getElementById('temas').innerHTML = Object.entries(TEMAS).map(([k, tm]) =>
+    `<div class="tema ${CFG.tema === k ? 'sel' : ''}" onclick="setTema('${k}')"><span class="bola" style="background:${bolaCss(tm)}"></span>${txt(tm.nombre)}</div>`).join('') +
+    `<label class="tema ${CFG.tema === 'propio' ? 'sel' : ''}"><span class="bola" id="bola-propia" style="background:${CFG.propio ? bolaCss(temaDesde(CFG.propio)) : 'conic-gradient(#f72585,#ffaa00,#00d68f,#00b4d8,#7b61ff,#f72585)'}"></span>${t('tuColor')}` +
+    `<input type="color" value="${CFG.propio || '#3fa7d6'}" oninput="setTemaPropio(this.value)" onchange="renderTemas()"></label>`;
+}
+function setTema(k) { CFG.tema = k; persist(); applyEstilo(); renderTemas(); }
+function setTemaPropio(c) {
+  CFG.tema = 'propio'; CFG.propio = c; persist(); applyEstilo();
+  document.getElementById('bola-propia').style.background = bolaCss(temaDesde(c));
+}
+// Color de cada tipo de evento y de las capas fijas («Celebración» pinta también las celebraciones fijas)
+const COLOR_FILAS = [['cumple'], ['aniversario'], ['recuerdo'], ['celebracion', 'colCeleb'], ['familiar'], ['recordatorio'],
+                     ['salud'], ['escuela'], ['otro'], ['festivo', 'colFest'], ['estaciones', 'colEst']];
+const colorDe = k => (CFG.colores || {})[k] || COL_BASE[k];
+function applyColores() {
+  for (const k in TIPOS) TIPOS[k].color = colorDe(k);
+  CELEB_COLOR = colorDe('celebracion'); FEST_COLOR = colorDe('festivo'); EST_COLOR = colorDe('estaciones');
+  document.documentElement.style.setProperty('--fest', FEST_COLOR);
+}
+function renderColores() {
+  document.getElementById('colores').innerHTML = COLOR_FILAS.map(([k, key]) =>
+    `<label class="color-fila"><input type="color" value="${colorDe(k)}" oninput="setColor('${k}', this.value)"><span>${key ? t(key) : TIPOS[k].icon + ' ' + tipoLabel(k)}</span></label>`).join('');
+}
+function setColor(k, v) { CFG.colores = { ...CFG.colores, [k]: v }; persist(); applyColores(); render(); }
+function resetColores() { CFG.colores = {}; persist(); applyColores(); render(); renderColores(); toast(t('coloresOrig')); }
+
+// ══ CONFETI ══ una vez al día, si hoy alguien cumple años o es un aniversario
+function festejar() {
+  if (store.get('micalendario_confeti') === iso(TODAY)) return;
+  if (!occurrences(TODAY, TODAY, true).some(o => ['cumple', 'aniversario'].includes(o.ev.tipo))) return;
+  store.set('micalendario_confeti', iso(TODAY));
+  const cols = [getComputedStyle(document.documentElement).getPropertyValue('--pink').trim(), '#ffaa00', '#00d68f', '#00b4d8', '#7b61ff', '#ff3d71'];
+  for (let i = 0; i < 70; i++) {
+    const c = document.createElement('i');
+    c.className = 'confeti';
+    c.style.cssText = `left:${Math.random() * 100}vw;background:${cols[i % cols.length]};--dx:${Math.round((Math.random() - .5) * 160)}px;` +
+      `--giro:${Math.round(Math.random() * 720 - 360)}deg;animation-duration:${(2 + Math.random() * 1.8).toFixed(2)}s;animation-delay:${(Math.random() * .6).toFixed(2)}s`;
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4500);
+  }
+}
+function toast(msg) {
+  const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ══ COPIA DE SEGURIDAD ══ Un archivo .json con todas las fechas y los ajustes
+function exportJSON() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify({ app: 'micalendario', version: APP_VERSION, events: EVENTS, cfg: CFG }, null, 2)], { type: 'application/json' }));
+  a.download = (L === 'es' ? 'mi-calendario-copia-' : 'my-calendar-backup-') + iso(new Date()) + '.json';
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function importJSON(input) {
+  const f = input.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!Array.isArray(d.events)) throw 0;
+      if (confirm(t('reemplazar', EVENTS.length, d.events.length))) {
+        EVENTS = d.events.filter(e => e && e.id && e.fecha && e.titulo);
+        if (d.cfg) CFG = Object.assign(CFG, d.cfg, { idioma: CFG.idioma, pais: CFG.pais });
+        persist(); applyTheme(); render(); pintarAjustesTodo();
+        toast(t('restaurada'));
+      }
+    } catch (e) { toast(t('copiaMala')); }
+    input.value = '';
+  };
+  r.readAsText(f);
+}
+
+// ══ VERSIÓN NUEVA ══ Compara esta versión con la publicada; si hay una más nueva, ofrece recargar
+async function checkVersion() {
+  if (location.protocol !== 'https:') return;
+  try {
+    const html = await (await fetch('./?v=' + Date.now(), { cache: 'no-store' })).text();
+    const pub = (html.match(/const APP_VERSION = '([^']+)'/) || [])[1];
+    document.getElementById('upd-banner').hidden = !pub || pub === APP_VERSION;
+  } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkVersion(); });
+
+document.getElementById('f-wa-ico').outerHTML = WA_SVG;
+aplicarIdioma();
+applyTheme();
+render();
+festejar();
+if (!CFG.pais) abrirBienvenida();
+checkVersion();
+document.getElementById('app-version').textContent = 'v' + APP_VERSION;
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW:', e));
+</script>
+</body>
+</html>
