@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<title>Mi Calendario</title>
+<title>Cheers</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -356,7 +356,7 @@ button { font-family: inherit; -webkit-tap-highlight-color: transparent; }
 <body>
 <div class="app">
   <header class="hdr">
-    <div class="hdr-logo"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8.5" cy="14.5" r="1.2" fill="currentColor"/><circle cx="12" cy="14.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="14.5" r="1.2" fill="currentColor"/></svg> <span data-i18n="app">Mi Calendario</span></div>
+    <div class="hdr-logo"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8.5" cy="14.5" r="1.2" fill="currentColor"/><circle cx="12" cy="14.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="14.5" r="1.2" fill="currentColor"/></svg> <span data-i18n="app">Cheers</span></div>
     <div class="hdr-actions">
       <button class="hdr-btn" onclick="openAjustes()"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg> <span data-i18n="ajustes">Ajustes</span></button>
       <button class="hdr-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
@@ -407,7 +407,7 @@ button { font-family: inherit; -webkit-tap-highlight-color: transparent; }
     </section>
 
     <div class="footer">
-      <div style="font-weight:600;margin-bottom:2px;" data-i18n="app">Mi Calendario</div>
+      <div style="font-weight:600;margin-bottom:2px;" data-i18n="app">Cheers</div>
       <div data-i18n="firma">Creada por Emmanuel Díaz</div>
       <div style="margin-top:6px;font-size:10px;opacity:.6;"><span id="app-version"></span> — <a href="privacidad.html" data-i18n="privacidad">Privacidad</a></div>
     </div>
@@ -546,11 +546,11 @@ button { font-family: inherit; -webkit-tap-highlight-color: transparent; }
 
 <div class="toast" id="toast"></div>
 
-<script src="comun.js?v=1.0"></script>
+<script src="comun.js?v=1.0.1"></script>
 <script>
-// Mi Calendario — versión pública (Google Play). Sale de la app de la familia (Familia\Calendario)
+// Cheers (antes «Mi Calendario») — versión pública (Google Play). Sale de la app de la familia (Familia\Calendario)
 // sin datos personales: todo se guarda solo en este teléfono (localStorage) y se puede guardar una copia.
-const APP_VERSION = '1.0';
+const APP_VERSION = '1.0.1';
 const TIPOS = CalComun.TIPOS;
 let FEST_COLOR = '#9b2226';
 const COL_BASE = { ...Object.fromEntries(Object.entries(TIPOS).map(([k, t]) => [k, t.color])), festivo: FEST_COLOR, estaciones: CalComun.EST_COLOR };
@@ -576,7 +576,7 @@ let editId = null, selTipo = 'cumple';
 // Para añadir uno: su tabla aquí, su línea en IDIOMAS y MENSAJES, y sus textos en comun.js. Lo que falte sale en inglés.
 const T = {
   es: {
-    app: 'Mi Calendario', nuevo: '＋ Nuevo evento', mes: 'Mes', proximos: 'Próximos', cumples: 'Cumpleaños', cumplesCorto: 'Cumples',
+    app: 'Cheers', nuevo: '＋ Nuevo evento', mes: 'Mes', proximos: 'Próximos', cumples: 'Cumpleaños', cumplesCorto: 'Cumples',
     ajustes: 'Ajustes', hoy: 'Hoy', proxTitulo: 'Próximos eventos', proxSub: 'Todo lo que viene en los próximos 12 meses.',
     cumTitulo: 'Cumpleaños y aniversarios', cumSub: 'Ordenados por el que llega antes.', firma: 'Creada por Emmanuel Díaz', privacidad: 'Privacidad',
     nuevoEv: 'Nuevo evento', editarEv: 'Editar evento', tipo: 'Tipo', titulo: 'Título', quienCumple: '¿Quién cumple años?',
@@ -614,7 +614,7 @@ const T = {
     hdrTitulos: { cumple: 'Ej: Ana', aniversario: 'Ej: Aniversario de boda', celebracion: 'Ej: Comunión de Pablo', familiar: 'Ej: Comida en casa de los abuelos', recordatorio: 'Ej: Renovar el pasaporte', salud: 'Ej: Dentista', escuela: 'Ej: Reunión de padres', recuerdo: 'Ej: Abuela Carmen', otro: 'Ej: …' },
   },
   en: {
-    app: 'My Calendar', nuevo: '＋ New event', mes: 'Month', proximos: 'Upcoming', cumples: 'Birthdays', cumplesCorto: 'Birthdays',
+    app: 'Cheers', nuevo: '＋ New event', mes: 'Month', proximos: 'Upcoming', cumples: 'Birthdays', cumplesCorto: 'Birthdays',
     ajustes: 'Settings', hoy: 'Today', proxTitulo: 'Upcoming events', proxSub: 'Everything coming up in the next 12 months.',
     cumTitulo: 'Birthdays and anniversaries', cumSub: 'Soonest first.', firma: 'Created by Emmanuel Díaz', privacidad: 'Privacy',
     nuevoEv: 'New event', editarEv: 'Edit event', tipo: 'Type', titulo: 'Title', quienCumple: 'Whose birthday is it?',
@@ -652,7 +652,7 @@ const T = {
     hdrTitulos: { cumple: 'E.g. Anna', aniversario: 'E.g. Wedding anniversary', celebracion: 'E.g. Paul’s graduation', familiar: 'E.g. Lunch at grandma’s', recordatorio: 'E.g. Renew passport', salud: 'E.g. Dentist', escuela: 'E.g. Parents’ meeting', recuerdo: 'E.g. Grandma Mary', otro: 'E.g. …' },
   },
   pt: {
-    app: 'Meu Calendário', nuevo: '＋ Novo evento', mes: 'Mês', proximos: 'Próximos', cumples: 'Aniversários', cumplesCorto: 'Aniversários',
+    app: 'Cheers', nuevo: '＋ Novo evento', mes: 'Mês', proximos: 'Próximos', cumples: 'Aniversários', cumplesCorto: 'Aniversários',
     ajustes: 'Configurações', hoy: 'Hoje', proxTitulo: 'Próximos eventos', proxSub: 'Tudo o que vem nos próximos 12 meses.',
     cumTitulo: 'Aniversários e bodas', cumSub: 'Primeiro os mais próximos.', firma: 'Criado por Emmanuel Díaz', privacidad: 'Privacidade',
     nuevoEv: 'Novo evento', editarEv: 'Editar evento', tipo: 'Tipo', titulo: 'Título', quienCumple: 'Quem faz aniversário?',
@@ -690,7 +690,7 @@ const T = {
     hdrTitulos: { cumple: 'Ex.: Ana', aniversario: 'Ex.: Bodas de casamento', celebracion: 'Ex.: Formatura do Pedro', familiar: 'Ex.: Almoço na casa da avó', recordatorio: 'Ex.: Renovar o passaporte', salud: 'Ex.: Dentista', escuela: 'Ex.: Reunião de pais', recuerdo: 'Ex.: Vovó Maria', otro: 'Ex.: …' },
   },
   fr: {
-    app: 'Mon Calendrier', nuevo: '＋ Nouvel événement', mes: 'Mois', proximos: 'À venir', cumples: 'Anniversaires', cumplesCorto: 'Anniv.',
+    app: 'Cheers', nuevo: '＋ Nouvel événement', mes: 'Mois', proximos: 'À venir', cumples: 'Anniversaires', cumplesCorto: 'Anniv.',
     ajustes: 'Réglages', hoy: 'Auj.', proxTitulo: 'Événements à venir', proxSub: 'Tout ce qui arrive dans les 12 prochains mois.',
     cumTitulo: 'Anniversaires', cumSub: 'Le plus proche en premier.', firma: 'Créée par Emmanuel Díaz', privacidad: 'Confidentialité',
     nuevoEv: 'Nouvel événement', editarEv: 'Modifier l’événement', tipo: 'Type', titulo: 'Titre', quienCumple: 'C’est l’anniversaire de qui ?',
@@ -728,7 +728,7 @@ const T = {
     hdrTitulos: { cumple: 'Ex. : Léa', aniversario: 'Ex. : Anniversaire de mariage', celebracion: 'Ex. : Communion de Paul', familiar: 'Ex. : Déjeuner chez mamie', recordatorio: 'Ex. : Renouveler le passeport', salud: 'Ex. : Dentiste', escuela: 'Ex. : Réunion de parents', recuerdo: 'Ex. : Mamie Jeanne', otro: 'Ex. : …' },
   },
   ca: {
-    app: 'El meu Calendari', nuevo: '＋ Nou esdeveniment', mes: 'Mes', proximos: 'Propers', cumples: 'Aniversaris', cumplesCorto: 'Aniversaris',
+    app: 'Cheers', nuevo: '＋ Nou esdeveniment', mes: 'Mes', proximos: 'Propers', cumples: 'Aniversaris', cumplesCorto: 'Aniversaris',
     ajustes: 'Configuració', hoy: 'Avui', proxTitulo: 'Propers esdeveniments', proxSub: 'Tot el que ve en els propers 12 mesos.',
     cumTitulo: 'Aniversaris i noces', cumSub: 'Primer el que arriba abans.', firma: 'Creada per Emmanuel Díaz', privacidad: 'Privadesa',
     nuevoEv: 'Nou esdeveniment', editarEv: 'Editar l’esdeveniment', tipo: 'Tipus', titulo: 'Títol', quienCumple: 'Qui fa anys?',
@@ -766,7 +766,7 @@ const T = {
     hdrTitulos: { cumple: 'Ex.: Anna', aniversario: 'Ex.: Aniversari de casament', celebracion: 'Ex.: Comunió del Pau', familiar: 'Ex.: Dinar a casa dels avis', recordatorio: 'Ex.: Renovar el passaport', salud: 'Ex.: Dentista', escuela: 'Ex.: Reunió de pares', recuerdo: 'Ex.: Àvia Carme', otro: 'Ex.: …' },
   },
   it: {
-    app: 'Il mio Calendario', nuevo: '＋ Nuovo evento', mes: 'Mese', proximos: 'Prossimi', cumples: 'Compleanni', cumplesCorto: 'Compleanni',
+    app: 'Cheers', nuevo: '＋ Nuovo evento', mes: 'Mese', proximos: 'Prossimi', cumples: 'Compleanni', cumplesCorto: 'Compleanni',
     ajustes: 'Impostazioni', hoy: 'Oggi', proxTitulo: 'Prossimi eventi', proxSub: 'Tutto quello che arriva nei prossimi 12 mesi.',
     cumTitulo: 'Compleanni e anniversari', cumSub: 'Prima i più vicini.', firma: 'Creata da Emmanuel Díaz', privacidad: 'Privacy',
     nuevoEv: 'Nuovo evento', editarEv: 'Modifica evento', tipo: 'Tipo', titulo: 'Titolo', quienCumple: 'Di chi è il compleanno?',
@@ -804,7 +804,7 @@ const T = {
     hdrTitulos: { cumple: 'Es.: Giulia', aniversario: 'Es.: Anniversario di matrimonio', celebracion: 'Es.: Comunione di Luca', familiar: 'Es.: Pranzo dai nonni', recordatorio: 'Es.: Rinnovare il passaporto', salud: 'Es.: Dentista', escuela: 'Es.: Colloquio con gli insegnanti', recuerdo: 'Es.: Nonna Maria', otro: 'Es.: …' },
   },
   de: {
-    app: 'Mein Kalender', nuevo: '＋ Neuer Termin', mes: 'Monat', proximos: 'Demnächst', cumples: 'Geburtstage', cumplesCorto: 'Geburtstage',
+    app: 'Cheers', nuevo: '＋ Neuer Termin', mes: 'Monat', proximos: 'Demnächst', cumples: 'Geburtstage', cumplesCorto: 'Geburtstage',
     ajustes: 'Einstellungen', hoy: 'Heute', proxTitulo: 'Nächste Termine', proxSub: 'Alles in den nächsten 12 Monaten.',
     cumTitulo: 'Geburtstage und Jahrestage', cumSub: 'Der nächste zuerst.', firma: 'Erstellt von Emmanuel Díaz', privacidad: 'Datenschutz',
     nuevoEv: 'Neuer Termin', editarEv: 'Termin bearbeiten', tipo: 'Art', titulo: 'Titel', quienCumple: 'Wer hat Geburtstag?',
@@ -1447,7 +1447,7 @@ function toast(msg) {
 function exportJSON() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify({ app: 'micalendario', version: APP_VERSION, events: EVENTS, cfg: CFG }, null, 2)], { type: 'application/json' }));
-  a.download = (L === 'es' ? 'mi-calendario-copia-' : 'my-calendar-backup-') + iso(new Date()) + '.json';
+  a.download = (L === 'es' ? 'cheers-copia-' : 'cheers-backup-') + iso(new Date()) + '.json';
   a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 function importJSON(input) {
