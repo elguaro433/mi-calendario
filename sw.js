@@ -1,7 +1,7 @@
 // Mi Calendario — service worker: "red primero". Con internet siempre carga la versión publicada
 // (así no se queda una versión vieja en el móvil); sin internet usa la última copia guardada.
 // Los datos del usuario están en localStorage: este archivo nunca los toca.
-const CACHE = 'micalendario-1.0.1';
+const CACHE = 'micalendario-1.0.2';
 const BASICOS = ['./', './index.html', './comun.js', './manifest.json', './privacidad.html', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 const HOSTS = [self.location.origin, 'https://fonts.googleapis.com', 'https://fonts.gstatic.com'];
 
